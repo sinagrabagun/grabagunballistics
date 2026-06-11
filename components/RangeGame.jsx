@@ -127,6 +127,16 @@
       return () => { alive = false; };
     }, [phase]);
 
+    // prefetch the global top scores so the in-run leaderboard is live
+    useEffect(() => {
+      if (!lbOn) return;
+      let alive = true;
+      window.Leaderboard.fetchBoard(monthKey())
+        .then(b => { if (alive) { setGboard(b); setLbErr(false); } })
+        .catch(() => { if (alive) setLbErr(true); });
+      return () => { alive = false; };
+    }, []);
+
     const cur = holds[stationIdx];
     const geo = useMemo(() => {
       const dropU = Math.abs(cur.dropU);
@@ -470,6 +480,41 @@
           <div className="rg-tb-time mono">{mmss}</div>
           <div className="rg-tb-bonus">Time bonus<b className="mono">+{timeBonus}</b><em>par 3:00</em></div>
         </div>
+        {(() => {
+          const globalMode = lbOn && !lbErr && !!gboard;
+          const src = globalMode ? gboard.entries : board.entries;
+          const top = src.slice(0, 5);
+          const leader = top.length ? top[0].score : 0;
+          const proj = src.filter(e => e.score > finalScore).length + 1;
+          const liveName = (nameInput || "").trim().toUpperCase() || "YOU";
+          return (
+            <div className="rg-lb">
+              <div className="rg-lb-head">
+                <span className="rg-lb-title"><window.UI.Icon name="bolt" size={13} /> {monthName()} Leaderboard</span>
+                <span className={"rg-lb-scope mono" + (globalMode ? " global" : "")}>{globalMode ? gboard.total + " SHOOTERS · GLOBAL" : "THIS DEVICE"}</span>
+              </div>
+              <div className="rg-lb-rows">
+                {top.length === 0 && <div className="rg-lb-empty">No scores logged yet this month — finish your string to set the bar.</div>}
+                {top.map((e, i) => (
+                  <div className={"rg-lb-row r" + (i + 1)} key={globalMode && e.id ? e.id : "l" + i}>
+                    <span className="rg-lb-rank mono">{i + 1}</span>
+                    <span className="rg-lb-name">{e.name}</span>
+                    <span className="rg-lb-hits mono">{e.hits}/{course.length}</span>
+                    <span className="rg-lb-score mono">{e.score}</span>
+                    <span className="rg-lb-bar" style={{ width: (leader ? Math.max(6, e.score / leader * 100) : 0) + "%" }}></span>
+                  </div>
+                ))}
+                <div className="rg-lb-row you">
+                  <span className="rg-lb-rank mono">{proj}</span>
+                  <span className="rg-lb-name">{liveName}<span className="rg-lb-livetag"><i className="rg-lb-pulse"></i>LIVE RUN</span></span>
+                  <span className="rg-lb-hits mono">{hits}/{course.length}</span>
+                  <span className="rg-lb-score mono">{finalScore}</span>
+                  <span className="rg-lb-bar live" style={{ width: (leader ? Math.min(100, Math.max(6, finalScore / leader * 100)) : 100) + "%" }}></span>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
         </div>
 
         {/* RIGHT */}

@@ -63,7 +63,7 @@
       updateActive({ caliberId: id, loadIdx: defaultLoadIdx(c), barrel: c.defaultBarrel });
       // only re-frame zero/range automatically when comparing a single line
       if (entries.length === 1) {
-        if (["Pistol", "Rimfire", "Lever"].includes(c.category)) {
+        if (["Pistol", "Rimfire", "Lever", "Straight-Wall"].includes(c.category)) {
           setZeroRange(50); setMaxRange(c.category === "Pistol" ? 150 : 300);
         } else { setZeroRange(100); setMaxRange(500); }
       }
@@ -119,6 +119,7 @@
     const comparing = entries.length > 1;
     const rangeOpts = activeCal.category === "Pistol" ? [100, 150, 200]
       : activeCal.category === "Rimfire" ? [150, 200, 300]
+      : ["Lever", "Straight-Wall"].includes(activeCal.category) ? [200, 300, 500]
       : [300, 500, 700];
 
     return (

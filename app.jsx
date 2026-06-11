@@ -123,7 +123,18 @@
           <div className="mode-switch">
             <button className={mode === "hunt" ? "active" : ""} onClick={() => setMode("hunt")}><window.UI.Icon name="gauge" size={16} />Shot Planner</button>
             <button className={mode === "lab" ? "active" : ""} onClick={() => setMode("lab")}><window.UI.Icon name="crosshair" size={16} />Ballistics Lab</button>
-            <button className={mode === "range" ? "active" : ""} onClick={() => setMode("range")}><window.UI.Icon name="target" size={16} />Test Your Setup</button>
+            <button className={mode === "range" ? "active" : ""} onClick={() => setMode("range")}>
+              <span className="ms-target" aria-hidden="true">
+                <svg viewBox="0 0 20 20" width="17" height="17">
+                  <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" strokeWidth="1.5"></circle>
+                  <circle cx="10" cy="10" r="4.6" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.65"></circle>
+                  <circle cx="10" cy="10" r="1.5" fill="currentColor"></circle>
+                  <circle className="mst-pulse" cx="13.2" cy="6.8" r="2"></circle>
+                  <circle className="mst-hit" cx="13.2" cy="6.8" r="1.7"></circle>
+                </svg>
+              </span>
+              Test Your Setup
+            </button>
           </div>
           {(mode === "lab" || mode === "range") && (
             <div className="load-strip">

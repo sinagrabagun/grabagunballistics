@@ -13,11 +13,11 @@
   const enabled = !!(BASE && KEY);
 
   function headers(extra) {
-    return Object.assign({
-      "apikey": KEY,
-      "Authorization": "Bearer " + KEY,
-      "Content-Type": "application/json"
-    }, extra || {});
+    const h = { "apikey": KEY, "Content-Type": "application/json" };
+    // Legacy JWT-style anon keys ("eyJ...") also go in the Authorization header;
+    // new publishable keys ("sb_publishable_...") must NOT — apikey alone is correct.
+    if (KEY.indexOf("sb_") !== 0) h["Authorization"] = "Bearer " + KEY;
+    return Object.assign(h, extra || {});
   }
 
   async function fetchBoard(month) {
