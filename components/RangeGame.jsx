@@ -296,23 +296,6 @@
               <h2 className="rg-intro-title">Test Your Setup</h2>
               <p className="rg-intro-lede">Build your rifle, read the wind, and shoot a 10-station course from memory — then post your score to the July leaderboard.</p>
 
-              <div className="rg-intro-h"><window.UI.Icon name="target" size={15} /> How it works</div>
-              <ol className="rg-intro-rules">
-                <li><b>10 stations, 100 → 1000 yd.</b> The first four ranges are fixed; the rest are called at random distances.</li>
-                <li><b>Holds are hidden.</b> Study your dope in setup, then shoot from memory — read the live wind and place the reticle yourself.</li>
-                <li><b>Wind is always live.</b> It shifts every shot and rerolls every run — no two strings read the same.</li>
-                <li><b>Score each station up to 100</b> (dead-center X). Finish under par <b>3:00</b> for up to <b>+300</b> time bonus.</li>
-                <li><b>Submit your name</b> to climb the monthly global leaderboard.</li>
-              </ol>
-
-              <div className="rg-intro-prize">
-                <div className="rg-intro-prize-head"><span className="rgp-star">★</span><span className="rg-intro-prize-title">July Prize · America 250</span></div>
-                <div className="rg-intro-prize-body">
-                  <p>The <b>Top 5 scores</b> on the leaderboard when July ends win <b>GrabAGun merch</b> — hats &amp; shirts up for grabs.</p>
-                  <div className="rg-intro-deadline"><window.UI.Icon name="gauge" size={13} /> Promo runs now through <b>July 31</b>.</div>
-                </div>
-              </div>
-
               <div className="rg-intro-capture">
                 <div className="rg-intro-h"><window.UI.Icon name="bolt" size={15} /> Enter to play &amp; qualify for the prize</div>
                 <div className="rg-cap-fields">
@@ -328,9 +311,30 @@
                 {capErr && <div className="rg-cap-err">{capErr}</div>}
               </div>
 
-              <button className="rg-intro-start" onClick={() => gateThen(() => restart())}><window.UI.Icon name="crosshair" size={17} /> START · 100 → 1000 YD</button>
+              <button className="rg-intro-start" onClick={() => gateThen(() => restart())}><window.UI.Icon name="crosshair" size={17} /> TEST YOUR SETUP</button>
               <button className="rg-intro-setup" onClick={() => gateThen(() => setPhase("setup"))}>Build / edit your rig first ⟶</button>
               <p className="rg-cap-fine">We use your name &amp; email to notify the Top 5 prize winners after July 31. Marketing emails only if you opt in above — unsubscribe anytime.</p>
+
+              <div className="rg-intro-info">
+                <div className="rg-intro-rulesbox">
+                  <div className="rg-intro-h"><window.UI.Icon name="target" size={15} /> How it works</div>
+                  <ol className="rg-intro-rules">
+                    <li><b>10 stations, 100 → 1000 yd.</b> The first four ranges are fixed; the rest are called at random distances.</li>
+                    <li><b>Holds are hidden.</b> Study your dope in setup, then shoot from memory — read the live wind and place the reticle yourself.</li>
+                    <li><b>Wind is always live.</b> It shifts every shot and rerolls every run — no two strings read the same.</li>
+                    <li><b>Score each station up to 100</b> (dead-center X). Finish under par <b>3:00</b> for up to <b>+300</b> time bonus.</li>
+                    <li><b>Submit your name</b> to climb the monthly global leaderboard.</li>
+                  </ol>
+                </div>
+
+                <div className="rg-intro-prize">
+                  <div className="rg-intro-prize-head"><span className="rgp-star">★</span><span className="rg-intro-prize-title">July Prize · America 250</span></div>
+                  <div className="rg-intro-prize-body">
+                    <p>The <b>Top 5 scores</b> on the leaderboard when July ends win <b>GrabAGun merch</b> — hats &amp; shirts up for grabs.</p>
+                    <div className="rg-intro-deadline"><window.UI.Icon name="gauge" size={13} /> Promo runs now through <b>July 31</b>.</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

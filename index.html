@@ -929,7 +929,7 @@
   .rg-zoom em { font-style: normal; font-family: var(--mono); font-size: 10px; color: #74D8D6; margin-left: 2px; }
   .fb-gust { font-size: 10.5px; color: var(--accent-text); font-family: var(--mono); margin-bottom: 10px; }
   /* completion modal */
-  .rg-modal-overlay { position: fixed; inset: 66px 0 0 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(6,9,14,0.72); backdrop-filter: blur(3px); animation: rg-fadein .2s ease; }
+  .rg-modal-overlay { position: fixed; inset: 66px 0 0 0; z-index: 60; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 24px 16px; background: rgba(6,9,14,0.72); backdrop-filter: blur(3px); animation: rg-fadein .2s ease; }
   @keyframes rg-fadein { from { opacity: 0 } to { opacity: 1 } }
   .rg-modal { width: min(460px, 94vw); max-height: 92vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7); animation: rg-pop .22s cubic-bezier(.2,.8,.3,1.2); }
   @keyframes rg-pop { from { transform: translateY(14px) scale(0.97); opacity: 0 } to { transform: none; opacity: 1 } }
@@ -981,7 +981,7 @@
   /* ============================================================
      RANGE INTRO / PROMO HERO POPUP — America 250
      ============================================================ */
-  .rg-intro { width: min(560px, 96vw); max-height: 94vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7); animation: rg-pop .24s cubic-bezier(.2,.8,.3,1.2); }
+  .rg-intro { width: min(720px, 100%); margin: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7); animation: rg-pop .24s cubic-bezier(.2,.8,.3,1.2); }
   .rg-intro-banner { line-height: 0; }
   .rg-intro-banner img { width: 100%; height: auto; display: block; border-radius: var(--r-lg) var(--r-lg) 0 0; }
   .rg-intro-body { padding: 20px 24px 24px; }
@@ -991,12 +991,20 @@
   .rg-intro-lede { font-size: 13.5px; color: var(--ink-2); margin: 0 0 18px; max-width: 54ch; }
   .rg-intro-h { font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); display: flex; align-items: center; gap: 8px; margin-bottom: 11px; }
   .rg-intro-h svg { color: var(--accent-2); }
-  .rg-intro-rules { margin: 0 0 18px; padding: 0; list-style: none; counter-reset: rgrule; display: flex; flex-direction: column; gap: 9px; }
+  .rg-intro-rules { margin: 0; padding: 0; list-style: none; counter-reset: rgrule; display: flex; flex-direction: column; gap: 9px; }
   .rg-intro-rules li { position: relative; padding-left: 32px; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; counter-increment: rgrule; }
   .rg-intro-rules li::before { content: counter(rgrule); position: absolute; left: 0; top: -1px; width: 21px; height: 21px; display: inline-flex; align-items: center; justify-content: center; border-radius: 5px; background: var(--surface-2); border: 1px solid var(--line); font-family: var(--mono); font-weight: 700; font-size: 11px; color: var(--accent-text); }
   .rg-intro-rules li b { color: var(--ink); font-weight: 600; }
 
-  .rg-intro-prize { border-radius: var(--r); overflow: hidden; border: 1px solid color-mix(in srgb, #1a2a5e 32%, var(--line)); margin-bottom: 20px; }
+  .rg-intro-prize { border-radius: var(--r); overflow: hidden; border: 1px solid color-mix(in srgb, #1a2a5e 32%, var(--line)); }
+  .rg-intro-info { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 20px; }
+  @media (min-width: 640px) { .rg-intro-info { grid-template-columns: 1.05fr 0.95fr; align-items: start; } }
+  @media (max-width: 600px) {
+    .rg-intro-body { padding: 16px 16px 20px; }
+    .rg-intro-title { font-size: 24px; }
+    .rg-intro-lede { font-size: 12.5px; margin-bottom: 14px; }
+    .rg-intro-banner img { max-height: 34vh; width: 100%; object-fit: cover; object-position: center; }
+  }
   .rg-intro-prize-head { display: flex; align-items: center; gap: 10px; padding: 11px 15px; background: #16245a; color: #fff; }
   .rgp-star { color: #f5c842; font-size: 16px; line-height: 1; flex-shrink: 0; }
   .rg-intro-prize-title { font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
@@ -1018,7 +1026,7 @@
   .rg-promo-reminder b { color: var(--ink); font-weight: 700; }
 
   /* ---- gate capture: name + email + marketing opt-in ---- */
-  .rg-intro-capture { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 16px; margin-bottom: 16px; }
+  .rg-intro-capture { margin-top: 16px; margin-bottom: 14px; }
   .rg-cap-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 11px; }
   .rg-cap-input { width: 100%; font-family: var(--sans); font-size: 13px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 11px 12px; background: var(--surface-2); color: var(--ink); }
   .rg-cap-input::placeholder { color: var(--ink-3); }
