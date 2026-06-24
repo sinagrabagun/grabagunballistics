@@ -10,7 +10,7 @@
 
   const LEAD = [100, 300, 500, 1000];
   function genCourse() {
-    const pool = []; for (let r = 125; r <= 975; r += 25) pool.push(r);
+    const pool = []; for (let r = 125; r <= 975; r += 25) if (!LEAD.includes(r)) pool.push(r);
     const extra = [];
     while (extra.length < 6 && pool.length) { const i = Math.floor(Math.random() * pool.length); extra.push(pool.splice(i, 1)[0]); }
     return LEAD.concat(extra);   // 10 stations: fixed 100/300/500/1000 then 6 random
@@ -25,6 +25,11 @@
   const CW = 480, C = 240, USABLE = 190;
   const PLATE_IN = 18;
   const WIND_HOURS = [2, 3, 4, 8, 9, 10];
+  // ----- downrange lane perspective: map a range (yd) to a screen Y on the ground,
+  // and the lane half-width at that depth. Gives the "further and further away" read. -----
+  const LANE_YH = 262, LANE_YNEAR = 446, LANE_D0 = 195, LANE_HALF = 174;
+  function laneY(range) { return LANE_YH + (LANE_YNEAR - LANE_YH) * (LANE_D0 / (LANE_D0 + range)); }
+  function laneT(y) { return (y - LANE_YH) / (LANE_YNEAR - LANE_YH); }   // 0 at horizon → 1 near
 
   const QUALS = [
     { min: 9, name: "MASTER", cls: "q-master" },
@@ -43,6 +48,18 @@
   function windPush(hour) { return (hour >= 1 && hour <= 5) ? "RIGHT→LEFT" : "LEFT→RIGHT"; }
   function loadPB() { try { return JSON.parse(localStorage.getItem("gag_range_pb") || "{}"); } catch (e) { return {}; } }
   function savePB(p) { try { localStorage.setItem("gag_range_pb", JSON.stringify(p)); } catch (e) {} }
+  // ----- player capture (name/email/marketing) — on-device mirror of the cloud leads DB -----
+  function loadLeads() { try { const d = JSON.parse(localStorage.getItem("gag_range_leads") || "null"); return d && Array.isArray(d.rows) ? d : { v: 1, rows: [] }; } catch (e) { return { v: 1, rows: [] }; } }
+  function saveLeadLocal(lead) {
+    try {
+      const db = loadLeads(); const em = (lead.email || "").toLowerCase(); const now = new Date().toISOString();
+      const i = db.rows.findIndex(r => (r.email || "").toLowerCase() === em);
+      if (i >= 0) db.rows[i] = { ...db.rows[i], ...lead, best_score: Math.max(db.rows[i].best_score || 0, lead.best_score || 0), updated_at: now };
+      else db.rows.push({ ...lead, created_at: now, updated_at: now });
+      localStorage.setItem("gag_range_leads", JSON.stringify(db));
+    } catch (e) {}
+  }
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   function uniq(a) { return Array.from(new Set(a)); }
 
   function RangeGame({ state, load, cal, metric }) {
@@ -72,13 +89,16 @@
     const dragModel = gload.bcG7 ? "G7" : "G1";
     const activeMV = window.BallisticsSolver.adjustMV(gload.mv, gload.testBarrel, cfg.barrel, gcal.fpsPerInch);
 
-    const [phase, setPhase] = useState("run");   // land straight in the game; EDIT SETUP returns here
+    const [phase, setPhase] = useState("intro");   // hero popup first; START enters the game; EDIT SETUP returns to setup
     const [wind, setWind] = useState(genWind);
     const [windSeq, setWindSeq] = useState(() => genWindSeq(wind, 10));
     const [course, setCourse] = useState(genCourse);
     const [hs, setHs] = useState(loadHS);
     const [board, setBoard] = useState(loadBoard);
     const [nameInput, setNameInput] = useState(() => { try { return localStorage.getItem("gag_range_name") || ""; } catch (e) { return ""; } });
+    const [emailInput, setEmailInput] = useState(() => { try { return localStorage.getItem("gag_range_email") || ""; } catch (e) { return ""; } });
+    const [marketing, setMarketing] = useState(() => { try { const v = localStorage.getItem("gag_range_marketing"); return v === null ? true : v === "1"; } catch (e) { return true; } });
+    const [capErr, setCapErr] = useState("");
     const [submitted, setSubmitted] = useState(null);
     // global leaderboard (Supabase via engine/leaderboard.js) — falls back to the on-device board
     const lbOn = !!(window.Leaderboard && window.Leaderboard.enabled);
@@ -143,11 +163,12 @@
       const gust = windSeq[stationIdx] || wind.spd;
       const driftU = wind.spd > 0 ? cur.windU * gust / wind.spd : cur.windU;
       const ppu = (zoom / 12) * (scopeUnit === "MIL" ? 20 : 6);   // first focal plane: subtension scales with magnification
-      const tcx = C, tcy = C + 64;
       const factor = scopeUnit === "MIL" ? 3.43775 : 1.04720;
       const subU = PLATE_IN / (factor * cur.range / 100);
-      const targetR = Math.max(18, (subU / 2) * ppu);
-      return { dropU, driftU, unitsToPx: ppu, tcx, tcy, targetR, correctAim: { x: tcx - driftU * ppu, y: tcy - dropU * ppu } };
+      const targetR = Math.max(15, (subU / 2) * ppu);
+      const baseY = laneY(cur.range);                    // feet of the silhouette, on the lane
+      const tcx = C, tcy = baseY - targetR * 1.35;        // A-zone center sits above the feet
+      return { dropU, driftU, unitsToPx: ppu, tcx, tcy, targetR, baseY, correctAim: { x: tcx - driftU * ppu, y: tcy - dropU * ppu } };
     }, [cur, scopeUnit, zoom, windSeq, stationIdx, wind.spd]);
 
     function toSvg(e) {
@@ -213,8 +234,29 @@
       setPb(nx); savePB(nx);
       const tk = todayKey(); const nh = { month: monthKey(), days: { ...hs.days }, monthBest: Math.max(hs.monthBest || 0, total) };
       nh.days[tk] = Math.max(hs.days[tk] || 0, total); setHs(nh); saveHS(nh);
+      captureLead(total);
     }
-    function restart(newWind) { if (newWind) { const nw = genWind(); setWind(nw); setCourse(genCourse()); begin(nw); } else { begin(wind); } }
+    // Every start / retry rerolls the wind AND the random stations — no two runs read the same.
+    function restart() { const nw = genWind(); setWind(nw); setCourse(genCourse()); begin(nw); }
+    // upsert the player into the capture DB (local mirror + cloud if configured)
+    function captureLead(score) {
+      const nm = (nameInput || "").trim().slice(0, 60);
+      const em = (emailInput || "").trim().toLowerCase();
+      if (!em || !EMAIL_RE.test(em)) return;
+      const lead = { name: nm, email: em, marketing: !!marketing, best_score: Math.max(pb.bestScore || 0, score || 0), caliber: gcal.name, month: monthKey() };
+      saveLeadLocal(lead);
+      if (window.LeadsDB && window.LeadsDB.enabled) window.LeadsDB.submit(lead).catch(() => {});
+    }
+    // validate the gate, persist the player, then run `go` (start course or open setup)
+    function gateThen(go) {
+      const nm = (nameInput || "").trim(); const em = (emailInput || "").trim();
+      if (nm.length < 2) { setCapErr("Please enter your name."); return; }
+      if (!EMAIL_RE.test(em)) { setCapErr("Please enter a valid email address."); return; }
+      setCapErr("");
+      try { localStorage.setItem("gag_range_name", nm.slice(0, 60)); localStorage.setItem("gag_range_email", em.toLowerCase()); localStorage.setItem("gag_range_marketing", marketing ? "1" : "0"); } catch (e) {}
+      captureLead();
+      go();
+    }
 
     const hits = shots.filter(s => s.hit).length;
     const fdCount = shots.length;
@@ -240,6 +282,60 @@
     const distUnit = metric ? "m" : "yd";
     const rangeDisp = metric ? Math.round(cur.range * 0.9144) : cur.range;
     const curWind = windSeq[stationIdx] || wind.spd;   // actual wind for this shot — shown accurately in the call
+
+    // ===================== INTRO / PROMO HERO POPUP =====================
+    if (phase === "intro") {
+      return (
+        <div className="rg-modal-overlay">
+          <div className="rg-intro">
+            <div className="rg-intro-banner">
+              <img src="assets/america-250-banner.jpg" alt="America 250 · GrabAGun Independence Day" />
+            </div>
+            <div className="rg-intro-body">
+              <div className="rg-intro-kicker">America 250 Range Challenge</div>
+              <h2 className="rg-intro-title">Test Your Setup</h2>
+              <p className="rg-intro-lede">Build your rifle, read the wind, and shoot a 10-station course from memory — then post your score to the July leaderboard.</p>
+
+              <div className="rg-intro-h"><window.UI.Icon name="target" size={15} /> How it works</div>
+              <ol className="rg-intro-rules">
+                <li><b>10 stations, 100 → 1000 yd.</b> The first four ranges are fixed; the rest are called at random distances.</li>
+                <li><b>Holds are hidden.</b> Study your dope in setup, then shoot from memory — read the live wind and place the reticle yourself.</li>
+                <li><b>Wind is always live.</b> It shifts every shot and rerolls every run — no two strings read the same.</li>
+                <li><b>Score each station up to 100</b> (dead-center X). Finish under par <b>3:00</b> for up to <b>+300</b> time bonus.</li>
+                <li><b>Submit your name</b> to climb the monthly global leaderboard.</li>
+              </ol>
+
+              <div className="rg-intro-prize">
+                <div className="rg-intro-prize-head"><span className="rgp-star">★</span><span className="rg-intro-prize-title">July Prize · America 250</span></div>
+                <div className="rg-intro-prize-body">
+                  <p>The <b>Top 5 scores</b> on the leaderboard when July ends win <b>GrabAGun merch</b> — hats &amp; shirts up for grabs.</p>
+                  <div className="rg-intro-deadline"><window.UI.Icon name="gauge" size={13} /> Promo runs now through <b>July 31</b>.</div>
+                </div>
+              </div>
+
+              <div className="rg-intro-capture">
+                <div className="rg-intro-h"><window.UI.Icon name="bolt" size={15} /> Enter to play &amp; qualify for the prize</div>
+                <div className="rg-cap-fields">
+                  <input className="rg-cap-input" type="text" maxLength={60} placeholder="Full name" value={nameInput}
+                    onChange={e => setNameInput(e.target.value)} />
+                  <input className="rg-cap-input" type="email" maxLength={120} placeholder="Email address" value={emailInput}
+                    onChange={e => setEmailInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") gateThen(() => restart()); }} />
+                </div>
+                <label className="rg-cap-opt">
+                  <input type="checkbox" checked={marketing} onChange={e => setMarketing(e.target.checked)} />
+                  <span>Yes — send me GrabAGun deals, new arrivals &amp; America 250 promo updates by email.</span>
+                </label>
+                {capErr && <div className="rg-cap-err">{capErr}</div>}
+              </div>
+
+              <button className="rg-intro-start" onClick={() => gateThen(() => restart())}><window.UI.Icon name="crosshair" size={17} /> START · 100 → 1000 YD</button>
+              <button className="rg-intro-setup" onClick={() => gateThen(() => setPhase("setup"))}>Build / edit your rig first ⟶</button>
+              <p className="rg-cap-fine">We use your name &amp; email to notify the Top 5 prize winners after July 31. Marketing emails only if you opt in above — unsubscribe anytime.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     // ===================== SETUP PHASE =====================
     if (phase === "setup") {
@@ -408,17 +504,49 @@
             <rect x="0" y="0" width={CW} height={CW} fill="url(#rgSky)" />
             <polygon points={`0,${CW} ${CW},${CW} ${C + 64},${C + 22} ${C - 64},${C + 22}`} fill="#3c4b40" opacity="0.6" />
             <ellipse cx={C} cy={C + 22} rx={CW} ry="30" fill="#46584a" opacity="0.4" />
-            {[-2.4, -1.2, 0, 1.2, 2.4].map((o, i) => <line key={i} x1={C + o * 95} y1={CW} x2={C + o * 7} y2={C + 24} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />)}
+            {/* lane edges + receding range posts → depth-of-field read */}
+            {(() => {
+              const marks = []; for (let r = 100; r <= 1000; r += 100) marks.push(r);
+              const eL = (y) => C - LANE_HALF * laneT(y), eR = (y) => C + LANE_HALF * laneT(y);
+              return <g>
+                <line x1={C - LANE_HALF} y1={LANE_YNEAR} x2={C} y2={LANE_YH} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+                <line x1={C + LANE_HALF} y1={LANE_YNEAR} x2={C} y2={LANE_YH} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+                {marks.map(r => {
+                  const y = laneY(r), t = laneT(y), xL = eL(y), xR = eR(y);
+                  const H = 4 + 30 * t, fs = 6 + 8 * t, isCur = r === cur.range;
+                  const disp = metric ? Math.round(r * 0.9144) : r;
+                  return <g key={r}>
+                    <line x1={xL} y1={y} x2={xR} y2={y} stroke={isCur ? "rgba(116,216,214,0.34)" : "rgba(255,255,255,0.055)"} strokeWidth="1" />
+                    <line x1={xR} y1={y} x2={xR} y2={y - H} stroke={isCur ? "var(--accent-2)" : "rgba(210,220,230,0.5)"} strokeWidth={0.7 + 1.5 * t} />
+                    <line x1={xL} y1={y} x2={xL} y2={y - H} stroke={isCur ? "var(--accent-2)" : "rgba(210,220,230,0.5)"} strokeWidth={0.7 + 1.5 * t} />
+                    <rect x={xR + 3} y={y - H - fs} width={fs * 2.7} height={fs * 1.5} rx="2" fill={isCur ? "var(--accent-2)" : "rgba(11,15,22,0.72)"} stroke={isCur ? "none" : "rgba(255,255,255,0.14)"} strokeWidth="0.8" />
+                    <text x={xR + 3 + fs * 1.35} y={y - H - fs + fs * 1.07} textAnchor="middle" fontSize={fs} fontFamily="var(--mono)" fontWeight="700" fill={isCur ? "#06121a" : "#c9d3dd"}>{disp}</text>
+                  </g>;
+                })}
+                <text x={C + LANE_HALF + 6} y={LANE_YNEAR - 3} fontSize="9" fontFamily="var(--mono)" fill="rgba(180,190,200,0.5)">{metric ? "m" : "yd"}</text>
+              </g>;
+            })()}
             <rect x="0" y="0" width={CW} height={CW} fill="url(#rgHaze)" />
-            {/* target */}
-            {(() => { const op = 1 - 0.16 * (stationIdx / 9); return <g opacity={op}>
-              <ellipse cx={g.tcx} cy={g.tcy + g.targetR * 0.95} rx={g.targetR * 0.85} ry={g.targetR * 0.18} fill="rgba(0,0,0,0.35)" />
-              <circle cx={g.tcx} cy={g.tcy} r={g.targetR} fill="#d97a2a" stroke="#0d0f12" strokeWidth="2" />
-              <circle cx={g.tcx} cy={g.tcy} r={g.targetR * 0.66} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="1.4" />
-              <circle cx={g.tcx} cy={g.tcy} r={g.targetR * 0.33} fill="none" stroke="rgba(0,0,0,0.45)" strokeWidth="1.4" />
-              <circle cx={g.tcx} cy={g.tcy} r={Math.max(2, g.targetR * 0.06)} fill="rgba(0,0,0,0.6)" />
-              {shots.filter(s => s.range === cur.range).map((s, i) => <circle key={i} cx={s.impact.x} cy={s.impact.y} r="3" fill="#11141a" stroke="#fff" strokeWidth="1" />)}
-            </g>; })()}
+            {/* IPSC cardboard silhouette — sized by subtension, seated on the lane */}
+            {(() => {
+              const op = 1 - 0.14 * (stationIdx / 9);
+              const cx = g.tcx, cy = g.tcy, R = g.targetR;
+              const bodyTop = cy - 1.22 * R, bodyBot = cy + 1.68 * R, wsh = R, wbot = 0.66 * R;
+              const headTop = bodyTop - 0.86 * R, headBot = bodyTop - 0.04 * R, hw = 0.48 * R;
+              const sw = (k) => Math.max(0.5, R * k);
+              const body = `M ${cx - wsh} ${bodyTop + 0.2 * R} Q ${cx - wsh} ${bodyTop} ${cx - wsh * 0.58} ${bodyTop} L ${cx + wsh * 0.58} ${bodyTop} Q ${cx + wsh} ${bodyTop} ${cx + wsh} ${bodyTop + 0.2 * R} L ${cx + wbot} ${bodyBot} L ${cx - wbot} ${bodyBot} Z`;
+              const tan = "#c6a973", edge = "#5a4322", perf = "rgba(60,44,22,0.5)", dash = `${R * 0.1} ${R * 0.07}`;
+              return <g opacity={op}>
+                <ellipse cx={cx} cy={bodyBot + 0.14 * R} rx={wbot * 1.55} ry={0.2 * R + 1} fill="rgba(0,0,0,0.3)" />
+                <rect x={cx - hw} y={headTop} width={hw * 2} height={headBot - headTop} rx={0.2 * R} fill={tan} stroke={edge} strokeWidth={sw(0.03)} />
+                {R > 22 && <rect x={cx - hw * 0.5} y={headTop + (headBot - headTop) * 0.16} width={hw} height={(headBot - headTop) * 0.5} rx="1" fill="none" stroke={perf} strokeWidth={sw(0.02)} strokeDasharray={dash} />}
+                <path d={body} fill={tan} stroke={edge} strokeWidth={sw(0.035)} />
+                {R > 22 && <rect x={cx - wsh * 0.8} y={cy - 1.02 * R} width={wsh * 1.6} height={2.0 * R} rx={0.46 * R} fill="none" stroke={perf} strokeWidth={sw(0.02)} strokeDasharray={dash} />}
+                <rect x={cx - 0.5 * R} y={cy - 0.8 * R} width={R} height={1.6 * R} rx={0.16 * R} fill="rgba(60,44,22,0.09)" stroke={perf} strokeWidth={sw(0.03)} strokeDasharray={dash} />
+                {R > 34 && <text x={cx} y={cy + 0.12 * R} textAnchor="middle" fontSize={R * 0.32} fontFamily="var(--mono)" fontWeight="700" fill="rgba(60,44,22,0.45)">A</text>}
+                {shots.filter(s => s.range === cur.range).map((s, i) => <circle key={i} cx={s.impact.x} cy={s.impact.y} r={Math.max(2.2, R * 0.07)} fill="#1a1206" stroke="#fff" strokeWidth="1" />)}
+              </g>;
+            })()}
             {/* scope shade outside the lens */}
             <rect x="0" y="0" width={CW} height={CW} fill="#05070b" opacity="0.6" mask="url(#lensMask)" />
             {/* reticle — crosshair fixed at the lens center (= cursor) */}
@@ -467,7 +595,7 @@
 
           {fired && !complete && (
             <div className={"rg-feedback " + (fired.hit ? "fb-hit" : "fb-miss")}>
-              <div className="fb-verdict">{fired.hit ? `HIT · ${fired.ring}${fired.ring === 10 ? " (X)" : ""}` : "MISS"}</div>
+              <div className="fb-verdict">{fired.hit ? `HIT · ${fired.ring >= 9 ? "A" : fired.ring >= 6 ? "C" : "D"}-ZONE` : "MISS"}</div>
               <div className="fb-detail mono">Impact {nz(Math.abs(fired.vMiss), 1)} {scopeUnit} {fired.vMiss > 0 ? "LOW" : "HIGH"} · {nz(Math.abs(fired.hMiss), 1)} {scopeUnit} {fired.hMiss > 0 ? "RIGHT" : "LEFT"}</div>
               <div className="fb-correct">Correct: hold {nz(Math.abs(fired.vMiss), 1)} {fired.vMiss > 0 ? "higher" : "lower"} · {nz(Math.abs(fired.hMiss), 1)} {fired.hMiss > 0 ? "left" : "right"}</div>
               <button className="rg-next" onClick={next}>{stationIdx < course.length - 1 ? "NEXT TARGET →" : "VIEW RESULTS →"}</button>
@@ -597,9 +725,13 @@
                 })()}
               </div>
             </div>
+            <div className="rg-promo-reminder">
+              <span className="rgp-star">★</span>
+              <span>Top 5 on the <b>July</b> board win GrabAGun merch — hats &amp; shirts. Promo runs through <b>July 31</b>. Wind rerolls every run, so go again.</span>
+            </div>
             <div className="rg-actions">
-              <button className="rg-replay" onClick={() => restart(false)}>RETRY · SAME WIND</button>
-              <button className="rg-replay alt" onClick={() => restart(true)}>NEW STRING · NEW WIND</button>
+              <button className="rg-replay" onClick={() => restart()}><window.UI.Icon name="crosshair" size={15} /> PLAY AGAIN · NEW WIND</button>
+              <button className="rg-replay alt" onClick={() => setPhase("intro")}>RULES &amp; PRIZE</button>
             </div>
           </div>
         </div>

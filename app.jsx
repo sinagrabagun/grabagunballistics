@@ -44,10 +44,129 @@
     );
   }
 
+  // ---- CSV helpers + admin player-DB export ----
+  function csvEscape(v) { if (v == null) v = ""; v = String(v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function toCSV(rows, cols) {
+    const head = cols.map(c => csvEscape(c.label)).join(",");
+    const body = rows.map(r => cols.map(c => csvEscape(c.get(r))).join(",")).join("\r\n");
+    return head + "\r\n" + body;
+  }
+  function downloadCSV(filename, csv) {
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+  function localLeads() { try { const d = JSON.parse(localStorage.getItem("gag_range_leads") || "null"); return d && Array.isArray(d.rows) ? d.rows : []; } catch (e) { return []; } }
+  const LEAD_COLS = [
+    { label: "Name", get: r => r.name },
+    { label: "Email", get: r => r.email },
+    { label: "Marketing Opt-In", get: r => (r.marketing ? "YES" : "NO") },
+    { label: "Best Score", get: r => r.best_score || 0 },
+    { label: "Caliber", get: r => r.caliber || "" },
+    { label: "Season", get: r => r.month || "" },
+    { label: "Captured", get: r => (r.created_at || "").slice(0, 10) }
+  ];
+
+  function AdminPortal({ onClose }) {
+    const PIN = (window.APP_CONFIG && window.APP_CONFIG.ADMIN_PIN) || "grabagun";
+    const ADMIN_EMAIL = (window.APP_CONFIG && window.APP_CONFIG.ADMIN_EMAIL) || "";
+    const cloudOn = !!(window.LeadsDB && window.LeadsDB.enabled);
+    const [authed, setAuthed] = useState(false);
+    const [pin, setPin] = useState("");
+    const [err, setErr] = useState("");
+    const [source, setSource] = useState(cloudOn ? "global" : "local");
+    const [leads, setLeads] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [loadErr, setLoadErr] = useState("");
+    const monthK = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
+
+    function load(src) {
+      if (src === "global" && cloudOn) {
+        setLoading(true); setLoadErr("");
+        window.LeadsDB.fetchAll()
+          .then(rows => setLeads(rows || []))
+          .catch(() => { setLoadErr("Couldn't reach the cloud DB — showing this device only."); setLeads(localLeads()); setSource("local"); })
+          .finally(() => setLoading(false));
+      } else { setLeads(localLeads()); }
+    }
+    function unlock() { if (pin.trim() === PIN) { setAuthed(true); setErr(""); load(source); } else { setErr("Incorrect PIN."); } }
+    function pick(s) { setSource(s); load(s); }
+
+    const optIns = leads.filter(r => r.marketing);
+    const dl = (rows, name) => { if (rows.length) downloadCSV(name, toCSV(rows, LEAD_COLS)); };
+    function emailToUs() {
+      const csv = toCSV(leads, LEAD_COLS);
+      const subject = "GrabAGun Range Challenge — player list (" + leads.length + ")";
+      const body = "Player capture export, " + new Date().toLocaleString() + ":\n\n" + csv;
+      window.location.href = "mailto:" + ADMIN_EMAIL + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    }
+
+    return (
+      <div className="admin-overlay" onClick={e => { if (e.target.classList.contains("admin-overlay")) onClose(); }}>
+        <div className="admin-modal">
+          <div className="admin-head">
+            <div className="admin-title"><window.UI.Icon name="sheet" size={18} /> Player Database</div>
+            <button className="admin-close" onClick={onClose} aria-label="Close">×</button>
+          </div>
+          <div className="admin-body">
+            {!authed ? (
+              <div className="admin-pin">
+                <label>Enter the admin PIN to view &amp; export captured players.</label>
+                <div className="admin-pin-row">
+                  <input className="admin-input" type="password" value={pin} autoFocus placeholder="PIN"
+                    onChange={e => setPin(e.target.value)} onKeyDown={e => { if (e.key === "Enter") unlock(); }} />
+                  <button className="admin-btn" onClick={unlock}>Unlock</button>
+                </div>
+                {err && <div className="admin-err">{err}</div>}
+              </div>
+            ) : (
+              <React.Fragment>
+                <div className="admin-stats">
+                  <div className="admin-stat"><span>Total players</span><b>{leads.length}</b></div>
+                  <div className="admin-stat"><span>Marketing opt-ins</span><b>{optIns.length}</b></div>
+                  <div className="admin-stat"><span>Source</span><b style={{ fontSize: "12px" }}>{source === "global" ? "CLOUD · ALL" : "THIS DEVICE"}</b></div>
+                </div>
+                {cloudOn && (
+                  <div className="admin-source">
+                    <span>View:</span>
+                    <button className={"admin-btn ghost" + (source === "global" ? " on" : "")} onClick={() => pick("global")}>Cloud (all devices)</button>
+                    <button className={"admin-btn ghost" + (source === "local" ? " on" : "")} onClick={() => pick("local")}>This device</button>
+                  </div>
+                )}
+                {loading && <div className="admin-note">Loading players…</div>}
+                {loadErr && <div className="admin-err">{loadErr}</div>}
+                <div className="admin-actions">
+                  <button className="admin-btn" onClick={() => dl(leads, "grabagun-players-" + monthK() + ".csv")} disabled={!leads.length}><window.UI.Icon name="download" size={14} /> Download all ({leads.length})</button>
+                  <button className="admin-btn ghost" onClick={() => dl(optIns, "grabagun-marketing-optins-" + monthK() + ".csv")} disabled={!optIns.length}>Marketing opt-ins ({optIns.length})</button>
+                  {ADMIN_EMAIL && <button className="admin-btn ghost" onClick={emailToUs} disabled={!leads.length}>Email list to us</button>}
+                </div>
+                <div className="admin-tablewrap">
+                  <table className="admin-table">
+                    <thead><tr><th>Name</th><th>Email</th><th>Mktg</th><th>Best</th><th>Captured</th></tr></thead>
+                    <tbody>
+                      {leads.length === 0 && <tr><td colSpan={5} className="am-no">No players captured yet.</td></tr>}
+                      {leads.slice(0, 250).map((r, i) => (
+                        <tr key={i}><td>{r.name}</td><td>{r.email}</td><td className={r.marketing ? "am-mk" : "am-no"}>{r.marketing ? "YES" : "—"}</td><td>{r.best_score || 0}</td><td className="am-no">{(r.created_at || "").slice(0, 10)}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="admin-note">CSV opens in Excel / Google Sheets. Only email players whose <b>Marketing Opt-In</b> is YES. {cloudOn ? "Cloud view aggregates every device; winners are the Top 5 by best score." : "Add Supabase keys (see README) to collect players across all devices — otherwise this is this browser only."}</p>
+              </React.Fragment>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   function App() {
     const [t, setTweak] = window.useTweaks(TWEAK_DEFAULTS);
     const urlInit = React.useRef(readUrl()).current;
     const [mode, setMode] = useState(urlInit.mode || "hunt");
+    const [adminOpen, setAdminOpen] = useState(false);
     const [state, setState] = useState(DEFAULTS);
     const [metric, setMetric] = useState(false);
     const [tab, setTab] = useState("Trajectory");
@@ -277,7 +396,10 @@
           <div className="sf-note">
             Ballistic outputs are planning guidance generated from advertised factory data — verify against your own chronograph and confirmed dope before relying on a firing solution.
           </div>
+          <button className="sf-admin" onClick={() => setAdminOpen(true)}>Admin</button>
         </footer>
+
+        {adminOpen && <AdminPortal onClose={() => setAdminOpen(false)} />}
 
         <window.TweaksPanel>
           <window.TweakSection label="Theme" />

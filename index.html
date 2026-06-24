@@ -79,7 +79,7 @@
     height: 66px; padding: 0 20px;
     background: var(--bg-2);
     border-bottom: 1px solid var(--line);
-    position: sticky; top: 0; z-index: 30;
+    position: sticky; top: 0; z-index: 70;
   }
   .brand { display: flex; align-items: center; gap: 12px; }
   .brand-img { height: 32px; width: auto; display: block; }
@@ -929,7 +929,7 @@
   .rg-zoom em { font-style: normal; font-family: var(--mono); font-size: 10px; color: #74D8D6; margin-left: 2px; }
   .fb-gust { font-size: 10.5px; color: var(--accent-text); font-family: var(--mono); margin-bottom: 10px; }
   /* completion modal */
-  .rg-modal-overlay { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(6,9,14,0.72); backdrop-filter: blur(3px); animation: rg-fadein .2s ease; }
+  .rg-modal-overlay { position: fixed; inset: 66px 0 0 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(6,9,14,0.72); backdrop-filter: blur(3px); animation: rg-fadein .2s ease; }
   @keyframes rg-fadein { from { opacity: 0 } to { opacity: 1 } }
   .rg-modal { width: min(460px, 94vw); max-height: 92vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7); animation: rg-pop .22s cubic-bezier(.2,.8,.3,1.2); }
   @keyframes rg-pop { from { transform: translateY(14px) scale(0.97); opacity: 0 } to { transform: none; opacity: 1 } }
@@ -978,6 +978,97 @@
     .rg-setupgrid { grid-template-columns: 1fr; }
   }
 
+  /* ============================================================
+     RANGE INTRO / PROMO HERO POPUP — America 250
+     ============================================================ */
+  .rg-intro { width: min(560px, 96vw); max-height: 94vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7); animation: rg-pop .24s cubic-bezier(.2,.8,.3,1.2); }
+  .rg-intro-banner { line-height: 0; }
+  .rg-intro-banner img { width: 100%; height: auto; display: block; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+  .rg-intro-body { padding: 20px 24px 24px; }
+  .rg-intro-kicker { font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-text); display: flex; align-items: center; gap: 8px; }
+  .rg-intro-kicker::before { content: ""; width: 6px; height: 6px; background: var(--accent-2); transform: rotate(45deg); }
+  .rg-intro-title { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1; letter-spacing: 0.01em; text-transform: uppercase; margin: 8px 0 6px; }
+  .rg-intro-lede { font-size: 13.5px; color: var(--ink-2); margin: 0 0 18px; max-width: 54ch; }
+  .rg-intro-h { font-family: var(--display); font-weight: 700; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); display: flex; align-items: center; gap: 8px; margin-bottom: 11px; }
+  .rg-intro-h svg { color: var(--accent-2); }
+  .rg-intro-rules { margin: 0 0 18px; padding: 0; list-style: none; counter-reset: rgrule; display: flex; flex-direction: column; gap: 9px; }
+  .rg-intro-rules li { position: relative; padding-left: 32px; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; counter-increment: rgrule; }
+  .rg-intro-rules li::before { content: counter(rgrule); position: absolute; left: 0; top: -1px; width: 21px; height: 21px; display: inline-flex; align-items: center; justify-content: center; border-radius: 5px; background: var(--surface-2); border: 1px solid var(--line); font-family: var(--mono); font-weight: 700; font-size: 11px; color: var(--accent-text); }
+  .rg-intro-rules li b { color: var(--ink); font-weight: 600; }
+
+  .rg-intro-prize { border-radius: var(--r); overflow: hidden; border: 1px solid color-mix(in srgb, #1a2a5e 32%, var(--line)); margin-bottom: 20px; }
+  .rg-intro-prize-head { display: flex; align-items: center; gap: 10px; padding: 11px 15px; background: #16245a; color: #fff; }
+  .rgp-star { color: #f5c842; font-size: 16px; line-height: 1; flex-shrink: 0; }
+  .rg-intro-prize-title { font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .rg-intro-prize-body { padding: 13px 15px; background: color-mix(in srgb, #1a2a5e 6%, var(--surface)); }
+  .rg-intro-prize-body p { margin: 0 0 9px; font-size: 12.5px; color: var(--ink); line-height: 1.5; }
+  .rg-intro-prize-body p b { color: #b3242b; font-weight: 700; }
+  .rg-intro-deadline { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
+  .rg-intro-deadline svg { color: var(--accent-2); }
+  .rg-intro-deadline b { color: var(--ink); }
+
+  .rg-intro-start { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 0; background: var(--accent-deep); color: #fff; font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; padding: 16px; border-radius: var(--r-sm); cursor: pointer; box-shadow: 0 10px 26px -10px color-mix(in srgb, var(--accent) 80%, transparent); transition: filter .12s, transform .08s; }
+  .rg-intro-start:hover { filter: brightness(1.08); }
+  .rg-intro-start:active { transform: translateY(1px); }
+  .rg-intro-setup { width: 100%; margin-top: 10px; border: 0; background: transparent; color: var(--ink-3); font-family: var(--display); font-weight: 600; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; padding: 6px; cursor: pointer; transition: color .12s; }
+  .rg-intro-setup:hover { color: var(--accent); }
+
+  /* prize reminder in the results modal */
+  .rg-promo-reminder { display: flex; align-items: center; gap: 10px; margin: 0 18px 4px; padding: 10px 13px; border-radius: var(--r-sm); background: color-mix(in srgb, #1a2a5e 7%, var(--surface)); border: 1px solid color-mix(in srgb, #1a2a5e 24%, var(--line)); font-size: 11.5px; color: var(--ink-2); line-height: 1.42; }
+  .rg-promo-reminder b { color: var(--ink); font-weight: 700; }
+
+  /* ---- gate capture: name + email + marketing opt-in ---- */
+  .rg-intro-capture { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 16px; margin-bottom: 16px; }
+  .rg-cap-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 11px; }
+  .rg-cap-input { width: 100%; font-family: var(--sans); font-size: 13px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 11px 12px; background: var(--surface-2); color: var(--ink); }
+  .rg-cap-input::placeholder { color: var(--ink-3); }
+  .rg-cap-input:focus { outline: none; border-color: var(--accent); box-shadow: var(--ring); }
+  .rg-cap-opt { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; color: var(--ink-2); line-height: 1.42; cursor: pointer; }
+  .rg-cap-opt input { width: 16px; height: 16px; accent-color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+  .rg-cap-err { color: var(--bad); font-size: 11.5px; font-weight: 600; margin-top: 9px; }
+  .rg-cap-fine { font-size: 10.5px; color: var(--ink-3); margin: 11px 0 0; line-height: 1.5; }
+  @media (max-width: 460px) { .rg-cap-fields { grid-template-columns: 1fr; } }
+
+  /* ============================================================
+     ADMIN PORTAL — player DB export (footer)
+     ============================================================ */
+  .sf-admin { border: 1px solid var(--line); background: transparent; color: var(--ink-3); font-family: var(--display); font-weight: 600; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 11px; border-radius: var(--r-sm); cursor: pointer; transition: border-color .12s, color .12s; }
+  .sf-admin:hover { border-color: var(--accent-line); color: var(--accent); }
+  .admin-overlay { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(6,9,14,0.72); backdrop-filter: blur(3px); animation: rg-fadein .2s ease; }
+  .admin-modal { width: min(660px, 96vw); max-height: 92vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7); animation: rg-pop .22s cubic-bezier(.2,.8,.3,1.2); }
+  .admin-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .admin-title { font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: 0.04em; text-transform: uppercase; display: flex; align-items: center; gap: 9px; }
+  .admin-title svg { color: var(--accent-2); }
+  .admin-close { border: 0; background: transparent; color: var(--ink-3); cursor: pointer; font-size: 22px; line-height: 1; padding: 2px 6px; }
+  .admin-close:hover { color: var(--ink); }
+  .admin-body { padding: 18px 20px 20px; }
+  .admin-pin { display: flex; flex-direction: column; gap: 10px; }
+  .admin-pin label { font-size: 12.5px; color: var(--ink-2); }
+  .admin-pin-row { display: flex; gap: 8px; }
+  .admin-input { flex: 1; min-width: 0; font-family: var(--mono); font-size: 14px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; background: var(--surface-2); color: var(--ink); }
+  .admin-input:focus { outline: none; border-color: var(--accent); box-shadow: var(--ring); }
+  .admin-btn { display: inline-flex; align-items: center; gap: 7px; border: 0; background: var(--accent-deep); color: #fff; font-family: var(--display); font-weight: 700; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 15px; border-radius: var(--r-sm); cursor: pointer; transition: filter .12s; }
+  .admin-btn:hover { filter: brightness(1.08); }
+  .admin-btn:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+  .admin-btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+  .admin-btn.ghost:hover { filter: none; border-color: var(--accent-line); color: var(--accent); }
+  .admin-btn.ghost.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .admin-err { color: var(--bad); font-size: 12px; font-weight: 600; margin-top: 2px; }
+  .admin-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; margin-bottom: 14px; }
+  .admin-stat { background: var(--surface); padding: 11px 14px; display: flex; flex-direction: column; gap: 3px; }
+  .admin-stat span { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-weight: 700; }
+  .admin-stat b { font-family: var(--mono); font-size: 21px; font-weight: 600; line-height: 1; }
+  .admin-source { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; font-size: 11px; color: var(--ink-3); }
+  .admin-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .admin-tablewrap { border: 1px solid var(--line); border-radius: var(--r-sm); overflow: auto; max-height: 300px; }
+  .admin-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .admin-table th { position: sticky; top: 0; background: var(--bg-2); text-align: left; padding: 8px 11px; font-family: var(--display); font-weight: 700; font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .admin-table td { padding: 7px 11px; border-bottom: 1px solid var(--line-2); white-space: nowrap; }
+  .admin-table tbody tr:nth-child(even) { background: var(--bg-2); }
+  .admin-table .am-mk { color: var(--good); font-weight: 700; }
+  .admin-table .am-no { color: var(--ink-3); }
+  .admin-note { font-size: 10.5px; color: var(--ink-3); margin-top: 12px; line-height: 1.5; }
+
 </style>
 <link rel="stylesheet" href="mobile.css" />
 </head>
@@ -994,6 +1085,7 @@
   <script src="engine/export.js"></script>
   <script src="config.js"></script>
   <script src="engine/leaderboard.js"></script>
+  <script src="engine/leads.js"></script>
 
   <script type="text/babel" src="tweaks-panel.jsx"></script>
   <script type="text/babel" src="components/UI.jsx"></script>

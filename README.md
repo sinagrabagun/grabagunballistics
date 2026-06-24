@@ -12,7 +12,7 @@ the leaderboard (optional).
 ## Files
 
 ```
-index.html              the whole app
+index.html              the whole app (rename of "Ballistic Calculator.html")
 app.jsx                 app shell, modes, state
 components/             UI: game, charts, reticle, inputs, hero compare
 engine/                 solver, drag tables, Excel export, leaderboard client
@@ -26,9 +26,11 @@ assets/                 logo
 ## Launch checklist
 
 ### 1. Put it on GitHub Pages
-1. Create a new GitHub repo and copy this folder's contents in.
-2. Repo → Settings → Pages → Source: *Deploy from a branch* → `main` / root.
-3. Your game is live at `https://<you>.github.io/<repo>/`.
+1. Create a new GitHub repo and copy this project in
+   (you can skip `screenshots/` and `uploads/` — they're working files).
+2. Rename **`Ballistic Calculator.html` → `index.html`**.
+3. Repo → Settings → Pages → Source: *Deploy from a branch* → `main` / root.
+4. Your game is live at `https://<you>.github.io/<repo>/`.
 
 Without any further setup the game is fully playable — scores just stay
 on each player's device.
@@ -50,6 +52,28 @@ on each player's device.
 5. Push. Done. The results screen now shows the **global monthly top 10**
    and **your rank of all shooters**, and falls back to the device-local
    board automatically if the network is down.
+
+### 3. Player capture + Admin export (America 250 promo)
+The "Test Your Setup" tab opens on a gate that captures **name + email**
+(with a default-on marketing opt-in) before play. Players are upserted by
+email into a `leads` table so you can contact the **Top 5** winners.
+
+1. The updated `supabase/schema.sql` also creates the `leads` table — re-run
+   it (or just the second block) in the SQL Editor.
+2. Set your **Admin PIN** and contact email in `config.js`:
+   ```js
+   ADMIN_PIN: "grabagun250",          // change before launch
+   ADMIN_EMAIL: "marketing@grabagun.com"
+   ```
+3. Footer → **Admin** → enter the PIN → view every captured player and
+   **Download CSV** (all players, or marketing opt-ins only). The CSV opens
+   in Excel / Google Sheets; an "Email list to us" button composes a mail to
+   `ADMIN_EMAIL` with the list inlined.
+
+> ⚠️ The anon key can read the `leads` table, so treat captured emails as
+> effectively public and the Admin PIN as convenience-only (not real access
+> control). For true privacy, move reads behind a Postgres function / Edge
+> Function backed by the service-role key.
 
 ## How the leaderboard works
 
