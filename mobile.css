@@ -21,12 +21,15 @@
    ============================================================ */
 @media (max-width: 880px) {
 
-  html, body { overflow-x: hidden; }
-  body { font-size: 14.5px; padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  :root { --mobtop: 114px; }
 
-  /* ---------- TOP BAR : brand + units only ---------- */
+  html, body { overflow-x: hidden; }
+  body { font-size: 14.5px; padding-bottom: 24px; }
+
+  /* ---------- TOP BAR : brand + units (row 1) + nav (row 2) ---------- */
   .topbar {
-    height: 54px; padding: 0 14px; gap: 12px;
+    height: auto; min-height: 54px; padding: 8px 14px;
+    flex-wrap: wrap; align-items: center; row-gap: 8px; column-gap: 12px;
   }
   .brand-img { height: 24px; }
   .brand-sub { font-size: 10px; letter-spacing: 0.16em; padding-left: 10px; }
@@ -34,30 +37,94 @@
   .topbar-right { gap: 8px; }
   .unit-toggle button { padding: 8px 12px; font-size: 11px; }
 
-  /* ---------- BOTTOM TAB BAR (was the inline mode switch) ---------- */
+  /* ---------- TOP TAB BAR (second row of the sticky header) ---------- */
+  .topbar-right { order: 2; }
   .mode-switch {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-    display: flex; gap: 0; margin: 0;
-    background: color-mix(in srgb, var(--bg-2) 94%, #000);
+    order: 3; flex-basis: 100%; width: 100%;
+    display: flex; gap: 6px; margin: 0; padding: 8px 0 0;
+    background: transparent; border: 0;
     border-top: 1px solid var(--line);
-    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
-    backdrop-filter: blur(8px);
+    border-radius: 0; box-shadow: none; backdrop-filter: none;
   }
   .mode-switch button {
+    position: relative; overflow: hidden;
     flex: 1; min-width: 0;
-    flex-direction: column; gap: 4px;
-    padding: 7px 4px 6px; border-radius: var(--r-sm);
-    font-size: 10px; letter-spacing: 0.02em; line-height: 1.1;
+    flex-direction: column; gap: 5px;
+    padding: 9px 4px 8px; border-radius: 12px;
+    font-family: var(--display); font-weight: 700;
+    font-size: 9.5px; letter-spacing: 0.07em; text-transform: uppercase; line-height: 1.15;
     white-space: normal; text-align: center; color: var(--ink-3);
-    border: 1px solid transparent; box-shadow: none;
+    background: var(--surface);
+    border: 1px solid var(--line); box-shadow: none;
+    transition: color .18s, background .18s, transform .12s, border-color .18s, box-shadow .18s;
   }
-  .mode-switch button svg { width: 22px; height: 22px; opacity: 0.8; }
-  .mode-switch button:hover { background: transparent; color: var(--ink-3); }
+  .mode-switch button svg { position: relative; z-index: 1; width: 23px; height: 23px; opacity: 0.85;
+    transition: opacity .18s, color .18s, transform .2s cubic-bezier(.34,1.56,.64,1); }
+  .mode-switch button > * { position: relative; z-index: 1; }
+  .mode-switch button:not(.active):active { transform: scale(0.94); background: var(--surface-2); }
+  .mode-switch button:not(.active):hover { color: var(--ink); border-color: var(--line-strong); }
+
+  /* top accent indicator on the active tab */
+  .mode-switch button::before {
+    content: ""; position: absolute; z-index: 2; top: 0; left: 50%;
+    width: 0; height: 3px; border-radius: 0 0 3px 3px;
+    background: var(--accent-2);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-2) 80%, transparent);
+    transform: translateX(-50%);
+    transition: width .25s cubic-bezier(.34,1.4,.64,1);
+  }
+  /* sheen sweep on the active tab */
+  .mode-switch button::after {
+    content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: linear-gradient(115deg, transparent 30%, color-mix(in srgb, #fff 32%, transparent) 48%, transparent 64%);
+    transform: translateX(-130%); opacity: 0;
+  }
   .mode-switch button.active {
-    color: #fff; background: var(--accent-soft);
-    border-color: var(--accent-line); box-shadow: none;
+    color: #fff;
+    background:
+      radial-gradient(120% 80% at 50% -20%, color-mix(in srgb, #fff 38%, transparent) 0%, transparent 55%),
+      linear-gradient(160deg, color-mix(in srgb, var(--accent) 78%, #2BA7E0) 0%, var(--accent-deep) 100%);
+    border-color: color-mix(in srgb, var(--accent) 60%, #fff);
+    box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent) 95%, transparent),
+                0 0 18px -2px color-mix(in srgb, var(--accent-2) 55%, transparent),
+                inset 0 1px 0 color-mix(in srgb, #fff 38%, transparent);
+    animation: ms-pop .32s cubic-bezier(.34,1.56,.64,1), ms-glow 2.4s ease-in-out .35s infinite;
   }
-  .mode-switch button.active svg { opacity: 1; color: var(--accent-2); }
+  .mode-switch button.active::before { width: 56%; animation: ms-bar-glow 2.4s ease-in-out infinite; }
+  .mode-switch button.active::after { animation: ms-sheen 4.5s ease 1.2s infinite; }
+  .mode-switch button.active svg {
+    opacity: 1; color: #fff; transform: translateY(-1px) scale(1.06);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-2) 85%, transparent));
+  }
+
+  @keyframes ms-pop {
+    0% { transform: scale(0.92); }
+    60% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+  @keyframes ms-glow {
+    0%, 100% { box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--accent) 95%, transparent),
+                0 0 16px -3px color-mix(in srgb, var(--accent-2) 45%, transparent),
+                inset 0 1px 0 color-mix(in srgb, #fff 38%, transparent); }
+    50% { box-shadow: 0 12px 28px -8px color-mix(in srgb, var(--accent) 100%, transparent),
+                0 0 26px 0px color-mix(in srgb, var(--accent-2) 80%, transparent),
+                inset 0 1px 0 color-mix(in srgb, #fff 50%, transparent); }
+  }
+  @keyframes ms-bar-glow {
+    0%, 100% { box-shadow: 0 0 8px color-mix(in srgb, var(--accent-2) 70%, transparent); opacity: 0.9; }
+    50% { box-shadow: 0 0 16px color-mix(in srgb, var(--accent-2) 100%, transparent); opacity: 1; }
+  }
+  @keyframes ms-sheen {
+    0% { transform: translateX(-130%); opacity: 0; }
+    6% { opacity: 1; }
+    20% { transform: translateX(130%); opacity: 0; }
+    100% { transform: translateX(130%); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mode-switch button.active,
+    .mode-switch button.active::before,
+    .mode-switch button.active::after { animation: none; }
+  }
 
   /* ---------- generic content padding ---------- */
   .hunt-page { padding: 0 14px 18px; }
@@ -77,7 +144,7 @@
   /* sticky cartridge/load bar that launches the input sheet */
   .setup-fab {
     display: flex; align-items: center; gap: 12px; width: 100%;
-    position: sticky; top: 54px; z-index: 22;
+    position: sticky; top: var(--mobtop); z-index: 22;
     margin: 12px 0 14px; padding: 11px 14px;
     background: var(--surface); border: 1px solid var(--line);
     border-left: 2px solid var(--accent-2); border-radius: var(--r);
@@ -231,7 +298,7 @@
 
   /* keep BOTH the top bar and the bottom tab nav visible/tappable while the
      trainer intro & results popups are open (mirrors the desktop z-index fix) */
-  .rg-modal-overlay { inset: 54px 0 calc(64px + env(safe-area-inset-bottom)) 0; padding: 14px; }
+  .rg-modal-overlay { inset: var(--mobtop) 0 0 0; padding: 14px; }
   .rg-modal { max-height: none; }
 }
 

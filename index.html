@@ -724,15 +724,24 @@
     .product-demo { grid-template-columns: 1fr; }
     .hero-head > div:first-child { min-width: 0; }
   }
+  @media (max-width: 760px) {
+    /* Topbar stacks; the mode menu becomes a bold full-width row pinned at the very top */
+    .topbar { flex-wrap: wrap; height: auto; padding: 8px 12px 10px; gap: 8px 10px; row-gap: 8px; }
+    .mode-switch { order: -1; flex: 1 0 100%; width: 100%; gap: 4px; padding: 4px; border-radius: 12px;
+      box-shadow: 0 3px 14px -6px rgba(0,0,0,0.55); border-width: 1px; }
+    .mode-switch button { flex: 1 1 0; min-width: 0; justify-content: center; padding: 13px 6px; font-size: 12px;
+      letter-spacing: 0.02em; gap: 5px; min-height: 46px; white-space: normal; line-height: 1.12; text-align: center; }
+    .mode-switch button svg { flex-shrink: 0; }
+    .brand { order: 0; }
+    .topbar-right { order: 1; margin-left: auto; }
+    .brand-sub { display: none; }
+  }
   @media (max-width: 620px) {
     .summary-strip { grid-template-columns: repeat(2, 1fr); }
     .load-strip { display: none; }
     .content, .hunt-page { padding-left: 14px; padding-right: 14px; }
     .rec-grid { grid-template-columns: 1fr; }
     .hunt-games { grid-template-columns: repeat(3, 1fr); }
-    .mode-switch { padding: 3px; gap: 3px; }
-    .mode-switch button { padding: 7px 9px; font-size: 11px; }
-    .topbar { gap: 10px; padding: 0 12px; }
     .hero-title { font-size: 22px; }
     .hero-controls { grid-template-columns: 1fr; }
     .hero-calls { flex-direction: column; }
