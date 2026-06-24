@@ -57,6 +57,11 @@
 
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
+  /* When embedded in a CMS iframe (data-embedded set by the height-sync script),
+     flatten internal viewport-height scrollers so the document flows as ONE column
+     and only the parent page scrolls — prevents a nested/double scrollbar. */
+  html[data-embedded] .rail { height: auto; max-height: none; overflow: visible; position: static; }
+  html[data-embedded], html[data-embedded] body { overflow: visible; height: auto; }
   body {
     font-family: var(--sans);
     background-color: var(--bg);
@@ -1166,6 +1171,34 @@
   <script type="text/babel">
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(<window.BallisticApp />);
+  </script>
+  <script>
+    /* Iframe height sync: posts document height to the parent so an embedding
+       page (Shopify/Vercel/etc.) can size the iframe and avoid a double scrollbar.
+       Plain JS so it runs immediately, independent of Babel/React. */
+    (function () {
+      if (window.parent === window) return; // not embedded; no-op
+      document.documentElement.setAttribute("data-embedded", "");
+      var last = 0;
+      function sendHeight() {
+        var h = Math.ceil(document.documentElement.scrollHeight || document.body.scrollHeight);
+        if (h && h !== last) {
+          last = h;
+          window.parent.postMessage({ type: "resize", height: h }, "*");
+        }
+      }
+      window.addEventListener("load", sendHeight);
+      window.addEventListener("resize", sendHeight);
+      if (window.ResizeObserver) {
+        var ro = new ResizeObserver(sendHeight);
+        ro.observe(document.body);
+      }
+      // Parent can also request the current height on demand.
+      window.addEventListener("message", function (e) {
+        if (e && e.data && e.data.type === "requestHeight") sendHeight();
+      });
+      setTimeout(sendHeight, 300); // after first React paint
+    })();
   </script>
 </body>
 </html>
