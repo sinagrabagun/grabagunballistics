@@ -28,6 +28,7 @@
   }/*EDITMODE-END*/;
 
   const TABS = ["Trajectory", "Reticle Holds", "Energy & Velocity", "Data Table"];
+  const APP_VERSION = "1.0.0-beta";
 
   // Read integration params: ?mode=lab|range|plan
   function readUrl() {
@@ -257,6 +258,7 @@
       <div className="app" data-mode={mode}>
         <header className="topbar">
           <window.UI.Wordmark />
+          <span className="brand-beta">Beta</span>
           <div className="mode-switch">
             <button className={mode === "hunt" ? "active" : ""} onClick={() => setMode("hunt")}><window.UI.Icon name="gauge" size={16} />Shot Planner</button>
             <button className={mode === "lab" ? "active" : ""} onClick={() => setMode("lab")}><window.UI.Icon name="crosshair" size={16} />Ballistics Lab</button>
@@ -419,6 +421,7 @@
           <div className="sf-note">
             Ballistic outputs are planning guidance generated from advertised factory data — verify against your own chronograph and confirmed dope before relying on a firing solution.
           </div>
+          <span className="sf-version mono">v{APP_VERSION}</span>
           <button className="sf-admin" onClick={() => setAdminOpen(true)}>Admin</button>
         </footer>
 
