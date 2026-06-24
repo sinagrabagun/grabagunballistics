@@ -733,7 +733,7 @@
                 {(() => {
                   const globalMode = lbOn && !lbErr;
                   if (globalMode && !gboard) return <div className="rg-empty">Loading global scores…</div>;
-                  const rows = globalMode ? gboard.entries : board.entries.slice(0, 10);
+                  const rows = globalMode ? gboard.entries.slice(0, 5) : board.entries.slice(0, 5);
                   const mine = (e) => !!submitted && (globalMode ? (!!submitted.id && e.id === submitted.id) : submitted.ts === e.ts);
                   return (
                     <React.Fragment>
@@ -743,7 +743,7 @@
                           <span className="rb-rank mono">{i + 1}</span><span className="rb-name">{e.name}{e.caliber ? <em className="rb-rig">{e.caliber}</em> : null}</span><span className="rb-hits mono">{e.hits}/{course.length}</span><span className="rb-score mono">{e.score}</span>
                         </div>
                       ))}
-                      {globalMode && submitted && gRank > 10 && (
+                      {globalMode && submitted && gRank > 5 && (
                         <div className="rg-board-row me">
                           <span className="rb-rank mono">{gRank}</span><span className="rb-name">{submitted.name}{submitted.caliber ? <em className="rb-rig">{submitted.caliber}</em> : null}</span><span className="rb-hits mono">{submitted.hits}/{course.length}</span><span className="rb-score mono">{submitted.score}</span>
                         </div>

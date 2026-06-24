@@ -23,7 +23,7 @@
   async function fetchBoard(month) {
     const url = BASE + "/rest/v1/scores?select=id,name,score,hits,caliber,created_at"
       + "&month=eq." + encodeURIComponent(month)
-      + "&order=score.desc,created_at.asc&limit=10";
+      + "&order=score.desc,created_at.asc&limit=5";
     const res = await fetch(url, { headers: headers({ "Prefer": "count=exact" }) });
     if (!res.ok) throw new Error("leaderboard fetch failed: " + res.status);
     const entries = await res.json();

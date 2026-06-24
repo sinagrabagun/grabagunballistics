@@ -855,13 +855,16 @@
   .dope-wind { color: var(--chart-2); font-weight: 600; }
   .dope-vel { color: var(--ink-3); }
 
-  .rg-begin-bar { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-top: 16px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh-sm); }
-  .rg-begin-wind { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); }
+  .rg-begin-bar { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; margin-top: 16px; padding: 24px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh-sm); }
+  .rg-begin-wind { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; font-size: 13px; color: var(--ink-2); }
   .rg-begin-wind svg { color: var(--accent-2); }
   .rg-begin-wind b { color: var(--ink); }
   .rg-rewind { margin-left: 6px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); font-family: var(--display); font-weight: 600; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; padding: 6px 12px; border-radius: var(--r-sm); cursor: pointer; }
   .rg-rewind:hover { border-color: var(--accent-line); color: var(--accent); }
-  .rg-begin { display: inline-flex; align-items: center; gap: 9px; border: 0; background: var(--accent-deep); color: #fff; font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; padding: 14px 26px; border-radius: var(--r-sm); cursor: pointer; box-shadow: 0 8px 22px -10px color-mix(in srgb, var(--accent) 80%, transparent); transition: filter .12s, transform .08s; }
+  .rg-begin { display: inline-flex; align-items: center; justify-content: center; gap: 12px; border: 0; background: var(--accent-deep); color: #fff; font-family: var(--display); font-weight: 800; font-size: 22px; letter-spacing: 0.06em; text-transform: uppercase; padding: 22px 60px; border-radius: var(--r); cursor: pointer; box-shadow: 0 16px 40px -14px color-mix(in srgb, var(--accent) 85%, transparent); transition: filter .12s, transform .08s; animation: rgBeginPulse 2.4s ease-in-out infinite; }
+  .rg-begin svg { width: 22px; height: 22px; }
+  @keyframes rgBeginPulse { 0%, 100% { box-shadow: 0 16px 40px -14px color-mix(in srgb, var(--accent) 85%, transparent); } 50% { box-shadow: 0 16px 52px -10px color-mix(in srgb, var(--accent) 95%, transparent); } }
+  @media (prefers-reduced-motion: reduce) { .rg-begin { animation: none; } }
   .rg-begin:hover { filter: brightness(1.08); }
   .rg-begin:active { transform: translateY(1px); }
   .rg-editbtn { margin-top: 10px; width: 100%; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); font-family: var(--display); font-weight: 600; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px; border-radius: var(--r-sm); cursor: pointer; }
