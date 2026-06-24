@@ -58,10 +58,21 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   /* When embedded in a CMS iframe (data-embedded set by the height-sync script),
-     flatten internal viewport-height scrollers so the document flows as ONE column
-     and only the parent page scrolls — prevents a nested/double scrollbar. */
-  html[data-embedded] .rail { height: auto; max-height: none; overflow: visible; position: static; }
+     flatten internal viewport-height scrollers AND un-fix overlays so the document
+     flows as ONE column that fully reports its height — prevents a clipped popup,
+     dead space, and nested/double scrollbars. */
   html[data-embedded], html[data-embedded] body { overflow: visible; height: auto; }
+  html[data-embedded] .rail { height: auto; max-height: none; overflow: visible; position: static; }
+  html[data-embedded] .topbar { position: static; }
+  /* intro / results / admin overlays: flow in-document instead of fixed-to-viewport */
+  html[data-embedded] .rg-modal-overlay,
+  html[data-embedded] .admin-overlay {
+    position: static; inset: auto; height: auto; min-height: 0;
+    overflow: visible; background: transparent; backdrop-filter: none;
+    padding: 8px 16px 24px; z-index: auto;
+  }
+  html[data-embedded] .rg-modal,
+  html[data-embedded] .admin-modal { max-height: none; overflow: visible; margin: 0 auto; }
   body {
     font-family: var(--sans);
     background-color: var(--bg);
