@@ -134,6 +134,7 @@
     const [pb, setPb] = useState(loadPB);
     const svgRef = useRef(null);
     const isTouch = useRef(false);
+    const dragging = useRef(false);
     const [zoom, setZoom] = useState(12);
     const complete = phase === "complete";
 
@@ -173,18 +174,40 @@
       return { dropU, driftU, unitsToPx: ppu, tcx, tcy, targetR, baseY, correctAim: { x: tcx - driftU * ppu, y: tcy - dropU * ppu } };
     }, [cur, scopeUnit, zoom, windSeq, stationIdx, wind.spd]);
 
-    function toSvg(e) {
+    // How far ABOVE the fingertip the reticle floats on touch, so the thumb
+    // never covers the target / point of impact (in viewBox units; CW = 480).
+    const TOUCH_LIFT = 78;
+    function toSvg(e, lift) {
       const r = svgRef.current.getBoundingClientRect();
-      let x = (e.clientX - r.left) / r.width * CW, y = (e.clientY - r.top) / r.height * CW;
+      let x = (e.clientX - r.left) / r.width * CW, y = (e.clientY - r.top) / r.height * CW - (lift || 0);
       return { x: Math.max(6, Math.min(CW - 6, x)), y: Math.max(6, Math.min(CW - 6, y)) };
     }
     function onMove(e) { if (!fired && !complete) setAim(toSvg(e)); }
     function onTouchAim(e) {
       if (fired || complete) return;
       isTouch.current = true;
+      dragging.current = true;
       const t = e.touches && e.touches[0];
-      if (t) setAim(toSvg(t));
+      if (t) { setAim(toSvg(t, TOUCH_LIFT)); }
     }
+    // Track the drag on window so the thumb can move OUTSIDE the optic panel
+    // (e.g. rest below the glass) and still steer the reticle.
+    useEffect(() => {
+      function move(e) {
+        if (!dragging.current || fired || complete) return;
+        const t = e.touches && e.touches[0];
+        if (t) { setAim(toSvg(t, TOUCH_LIFT)); e.preventDefault(); }
+      }
+      function end() { dragging.current = false; }
+      window.addEventListener("touchmove", move, { passive: false });
+      window.addEventListener("touchend", end);
+      window.addEventListener("touchcancel", end);
+      return () => {
+        window.removeEventListener("touchmove", move, { passive: false });
+        window.removeEventListener("touchend", end);
+        window.removeEventListener("touchcancel", end);
+      };
+    }, [fired, complete]);
 
     function fire() {
       if (fired || complete) return;
@@ -449,7 +472,7 @@
 
     return (
       <React.Fragment>
-      <div className="rg">
+      <div className={"rg" + (complete ? " rg-complete" : "")}>
         {/* LEFT */}
         <aside className="rg-side">
           <div className="rg-card">
@@ -509,7 +532,7 @@
         <section className="rg-scene">
           <div className={"rg-shaker" + (recoil ? " rg-recoil" : "")}>
           <svg ref={svgRef} viewBox={`0 0 ${CW} ${CW}`} className="rg-scope" onMouseMove={onMove}
-               onTouchStart={onTouchAim} onTouchMove={onTouchAim}
+               onTouchStart={onTouchAim}
                onClick={() => { if (isTouch.current) { isTouch.current = false; return; } if (!fired && !complete) fire(); }} style={{ cursor: fired || complete ? "default" : "none", touchAction: "none" }}>
             <defs>
               <linearGradient id="rgSky" x1="0" y1="0" x2="0" y2="1">
