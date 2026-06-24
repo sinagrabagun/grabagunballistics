@@ -200,6 +200,22 @@
     const launchAngle = solveZero(opts, zeroFt);
     const samples = integrate(opts, launchAngle);
 
+    // ---- gyroscopic stability (Miller) + spin drift (Litz) ----
+    // SG from twist, bullet diameter, weight and an estimated length; spin drift is a
+    // constant-direction horizontal offset (right for RH twist) growing with time of flight.
+    const twist = p.twist;            // barrel twist, inches per turn (>0)
+    const dia = p.diameter;           // bullet diameter, inches
+    let stabilitySG = null, sdSign = p.leftTwist ? -1 : 1;
+    if (twist && dia) {
+      const len = p.bulletLength || (p.bulletWeight / (dia * dia * 1500));   // est. length (in)
+      const tcal = twist / dia, lcal = len / dia;
+      const sg0 = 30 * p.bulletWeight / (tcal * tcal * Math.pow(dia, 3) * lcal * (1 + lcal * lcal));
+      const fv = Math.pow(Math.max(0.1, (p.muzzleVelocity || 2800)) / 2800, 1 / 3);
+      stabilitySG = sg0 * fv / (rhoRatio || 1);   // atmosphere correction ≈ 1/density-ratio
+    }
+    const spinOn = stabilitySG != null && p.spinDrift !== false;
+    const spinDriftIn = (tof) => spinOn ? sdSign * 1.25 * (stabilitySG + 1.2) * Math.pow(Math.max(0, tof), 1.83) : 0;
+
     // Build output rows at each increment.
     const inc = p.increment || 100;
     const rows = [];
@@ -208,7 +224,8 @@
       const rangeFt = r * 3;
       const s = interpAt(samples, rangeFt);
       const dropIn = s.y * 12;                 // +up, -down relative to LOS
-      const windIn = s.z * 12;                 // +right
+      const sdIn = spinDriftIn(s.t);           // spin drift (in, +right)
+      const windIn = s.z * 12 + sdIn;          // total horizontal: wind + spin drift
       const rangeYd = r || 0.0001;
       const moaPerIn = 1 / (1.04720 * rangeYd / 100);
       const milPerIn = 1 / (3.59999 * rangeYd / 100);
@@ -225,7 +242,10 @@
         dropMIL: r === 0 ? 0 : dropIn * milPerIn,
         windIn,
         windMOA: r === 0 ? 0 : windIn * moaPerIn,
-        windMIL: r === 0 ? 0 : windIn * milPerIn
+        windMIL: r === 0 ? 0 : windIn * milPerIn,
+        spinDriftIn: sdIn,
+        spinDriftMOA: r === 0 ? 0 : sdIn * moaPerIn,
+        spinDriftMIL: r === 0 ? 0 : sdIn * milPerIn
       });
     }
 
@@ -233,7 +253,7 @@
     const path = samples.map(s => ({
       rangeYd: s.x / 3,
       dropIn: s.y * 12,
-      windIn: s.z * 12,
+      windIn: s.z * 12 + spinDriftIn(s.t),
       velocity: s.v,
       energy: weight * s.v * s.v / 450240
     }));
@@ -255,9 +275,21 @@
         zeroRange: p.zeroRange,
         maxOrdinate, maxOrdRange,
         transonicRange: transRange,
-        dragModel, bc, sos, rhoRatio
+        dragModel, bc, sos, rhoRatio, stabilitySG
       }
     };
+  }
+
+  // Gyroscopic stability factor (Miller) at standard atmosphere for a UI readout.
+  // twistIn = barrel twist (in/turn), dia = bullet dia (in), weightGr (gr), mv (fps),
+  // lenIn optional (else estimated from weight & diameter).
+  function stability(twistIn, dia, weightGr, mv, lenIn) {
+    if (!twistIn || !dia || !weightGr) return null;
+    const len = lenIn || (weightGr / (dia * dia * 1500));
+    const tcal = twistIn / dia, lcal = len / dia;
+    const sg0 = 30 * weightGr / (tcal * tcal * Math.pow(dia, 3) * lcal * (1 + lcal * lcal));
+    const fv = Math.pow(Math.max(0.1, (mv || 2800)) / 2800, 1 / 3);
+    return { sg: sg0 * fv, lengthIn: len };
   }
 
   // Adjust muzzle velocity for barrel length difference from the load's test barrel.
@@ -266,5 +298,5 @@
     return Math.max(200, baseMV + (actualBarrel - testBarrel) * (fpsPerInch || 25));
   }
 
-  window.BallisticsSolver = { solve, adjustMV, speedOfSound, densityRatio };
+  window.BallisticsSolver = { solve, adjustMV, speedOfSound, densityRatio, stability };
 })();

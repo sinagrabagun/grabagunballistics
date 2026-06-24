@@ -228,6 +228,11 @@
   .rg-setupgrid { gap: 12px; }
   .rg-begin-bar { flex-direction: column; align-items: stretch; gap: 12px; }
   .rg-begin { justify-content: center; }
+
+  /* keep BOTH the top bar and the bottom tab nav visible/tappable while the
+     trainer intro & results popups are open (mirrors the desktop z-index fix) */
+  .rg-modal-overlay { inset: 54px 0 calc(64px + env(safe-area-inset-bottom)) 0; padding: 14px; }
+  .rg-modal { max-height: none; }
 }
 
 /* ============================================================

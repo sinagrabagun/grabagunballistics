@@ -391,7 +391,9 @@
   .hqs.accent b { color: var(--accent-text); }
   .hqs.accent b em { color: var(--accent-text); opacity: 0.7; }
 
-  .hero-controls { display: grid; grid-template-columns: 1.1fr 1.7fr 1.2fr auto auto; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); align-items: end; }
+  .hero-controls { display: grid; grid-template-columns: 1.1fr 1.6fr 1fr 1fr 0.9fr 0.85fr; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); align-items: end; }
+  .hero-controls .seg-mini { width: 100%; }
+  .hero-controls .seg-mini button { flex: 1; padding: 7px 6px; text-align: center; }
   .hctl { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
   .hctl > span { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); display: flex; justify-content: space-between; }
   .hctl > span b { color: var(--accent-text); font-family: var(--mono); }
@@ -432,8 +434,10 @@
   .hero-panel.hero-drop { border-right: 1px solid var(--line); }
   .hp-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
   .hp-head h3 { font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
-  .hp-range { display: flex; align-items: center; gap: 6px; }
+  .hp-range { display: flex; align-items: center; gap: 8px; }
   .hp-range span { font-size: 10px; color: var(--ink-3); margin-right: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .hp-range input[type="range"] { width: 130px; flex: none; }
+  .hp-range b { font-family: var(--mono); font-weight: 600; font-size: 11.5px; color: var(--accent-text); min-width: 52px; text-align: right; }
   .hp-range button { border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); font-family: var(--mono); font-size: 10.5px; padding: 4px 9px; border-radius: var(--r-xs); cursor: pointer; }
   .hp-range button.active { background: var(--accent-deep); border-color: var(--accent-deep); color: #fff; }
   .hero-holds { border-left: 0; }
@@ -931,7 +935,7 @@
   /* completion modal */
   .rg-modal-overlay { position: fixed; inset: 66px 0 0 0; z-index: 60; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 24px 16px; background: rgba(6,9,14,0.72); backdrop-filter: blur(3px); animation: rg-fadein .2s ease; }
   @keyframes rg-fadein { from { opacity: 0 } to { opacity: 1 } }
-  .rg-modal { width: min(460px, 94vw); max-height: 92vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7); animation: rg-pop .22s cubic-bezier(.2,.8,.3,1.2); }
+  .rg-modal { width: min(460px, 94vw); max-height: 92vh; margin: auto; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7); animation: rg-pop .22s cubic-bezier(.2,.8,.3,1.2); }
   @keyframes rg-pop { from { transform: translateY(14px) scale(0.97); opacity: 0 } to { transform: none; opacity: 1 } }
   .rg-modal-qual { text-align: center; padding: 22px 20px 18px; border-bottom: 1px solid var(--line); position: relative; }
   .rg-modal-qual::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
@@ -961,6 +965,13 @@
   .rg-board-row.me { background: color-mix(in srgb, var(--accent-2) 13%, var(--surface)); margin: 0 -8px; padding: 7px 8px; border-radius: var(--r-xs); border-top: 0; }
   .rg-board-row.me .rb-name { color: var(--accent-text); }
   .rg-board-row.me .rb-rank { color: var(--accent-text); }
+
+  /* leaderboard rows show the rig (cartridge · load) under the name */
+  .rg-lb-name { flex-direction: column; align-items: flex-start; gap: 1px; line-height: 1.18; }
+  .rg-lb-who { display: inline-flex; align-items: center; }
+  .rg-lb-rig { font-size: 9px; font-weight: 500; color: var(--ink-3); letter-spacing: 0; text-transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .rb-name { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+  .rb-rig { font-style: normal; font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
   /* ---- shot FX: recoil shake + muzzle flash + impact ---- */
   .rg-shaker { position: relative; }
@@ -1024,6 +1035,51 @@
   /* prize reminder in the results modal */
   .rg-promo-reminder { display: flex; align-items: center; gap: 10px; margin: 0 18px 4px; padding: 10px 13px; border-radius: var(--r-sm); background: color-mix(in srgb, #1a2a5e 7%, var(--surface)); border: 1px solid color-mix(in srgb, #1a2a5e 24%, var(--line)); font-size: 11.5px; color: var(--ink-2); line-height: 1.42; }
   .rg-promo-reminder b { color: var(--ink); font-weight: 700; }
+
+  /* ---- ammo subscription "running ad" at the bottom of the results modal ---- */
+  .rg-ad { display: block; position: relative; margin-top: 14px; overflow: hidden; line-height: 0; text-decoration: none; border-top: 1px solid var(--line); border-radius: 0 0 var(--r-lg) var(--r-lg); }
+  .rg-ad img { width: 100%; height: auto; display: block; }
+  .rg-ad-cta { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 10px 14px; background: linear-gradient(to top, rgba(7,10,15,0.94), rgba(7,10,15,0.5) 72%, transparent); color: #fff; font-family: var(--display); font-weight: 700; font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.15; }
+  .rg-ad-arrow { display: inline-block; transition: transform .15s; }
+  .rg-ad:hover .rg-ad-arrow { transform: translateX(5px); }
+  .rg-ad-tag { position: absolute; top: 9px; right: 9px; font-family: var(--mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.72); background: rgba(7,10,15,0.5); border: 1px solid rgba(255,255,255,0.22); padding: 2px 6px; border-radius: 3px; }
+  .rg-ad::after { content: ""; position: absolute; top: 0; bottom: 0; width: 36%; left: -60%; background: linear-gradient(105deg, transparent, rgba(255,255,255,0.22), transparent); transform: skewX(-18deg); animation: rgAdShine 5s ease-in-out infinite; pointer-events: none; }
+  @keyframes rgAdShine { 0% { left: -60%; } 26% { left: 135%; } 100% { left: 135%; } }
+  @media (prefers-reduced-motion: reduce) { .rg-ad::after { display: none; } }
+
+  /* ammo subscription ad at the bottom of the Shot Planner */
+  .hp-ad { display: block; position: relative; overflow: hidden; line-height: 0; text-decoration: none; margin: 18px 0 6px; border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh-sm); }
+  .hp-ad img { width: 100%; height: auto; display: block; }
+  .hp-ad::after { content: ""; position: absolute; top: 0; bottom: 0; width: 36%; left: -60%; background: linear-gradient(105deg, transparent, rgba(255,255,255,0.22), transparent); transform: skewX(-18deg); animation: rgAdShine 5s ease-in-out infinite; pointer-events: none; }
+  @media (prefers-reduced-motion: reduce) { .hp-ad::after { display: none; } }
+
+  /* ---- animated wind-drift indicator (Wind Call) ---- */
+  .rg-windflow { position: relative; height: 18px; width: 96px; margin-top: 6px; }
+  .rg-windflow .rg-wf { position: absolute; left: 0; top: 50%; height: 2.5px; width: 22px; border-radius: 2px; transform: translateY(-50%); background: linear-gradient(90deg, transparent, var(--accent-2)); animation: rgWF 1.7s linear infinite; }
+  .rg-windflow .rg-wf:nth-child(1) { top: 4px; width: 15px; animation-delay: .2s; opacity: 0.6; }
+  .rg-windflow .rg-wf:nth-child(3) { top: 13px; width: 17px; animation-delay: .55s; opacity: 0.5; }
+  .rg-windflow .rg-wf-head { position: absolute; top: 50%; transform: translateY(-50%); color: var(--accent-2); }
+  .rg-windflow.to-right .rg-wf-head { right: 0; }
+  .rg-windflow.to-left .rg-wf-head { left: 0; transform: translateY(-50%) scaleX(-1); }
+  .rg-windflow.to-left .rg-wf { background: linear-gradient(90deg, var(--accent-2), transparent); animation-name: rgWFL; }
+  @keyframes rgWF { 0% { transform: translateX(0) translateY(-50%); opacity: 0; } 22% { opacity: 1; } 78% { opacity: 1; } 100% { transform: translateX(70px) translateY(-50%); opacity: 0; } }
+  @keyframes rgWFL { 0% { transform: translateX(70px) translateY(-50%); opacity: 0; } 22% { opacity: 1; } 78% { opacity: 1; } 100% { transform: translateX(0) translateY(-50%); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .rg-windflow .rg-wf { animation: none; opacity: 0.75; } }
+
+  /* ---- large centered wind-drift animation in the scope ---- */
+  .rg-windbig { position: absolute; top: 19%; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; z-index: 4; }
+  .rg-wb-arrow { display: flex; align-items: center; gap: 1px; }
+  .rg-windbig.to-left .rg-wb-arrow { flex-direction: row-reverse; }
+  .rg-wb-arrow svg { color: #35d2ff; filter: drop-shadow(0 0 8px rgba(53,210,255,0.8)); opacity: 0.18; animation: rgWBmarch 1.15s ease-in-out infinite; }
+  .rg-windbig.to-left .rg-wb-arrow svg { transform: scaleX(-1); }
+  .rg-wb-arrow svg:nth-child(1) { animation-delay: 0s; }
+  .rg-wb-arrow svg:nth-child(2) { animation-delay: .15s; }
+  .rg-wb-arrow svg:nth-child(3) { animation-delay: .30s; }
+  .rg-wb-arrow svg:nth-child(4) { animation-delay: .45s; }
+  @keyframes rgWBmarch { 0%, 100% { opacity: 0.16; } 45% { opacity: 1; } }
+  .rg-wb-label { font-family: var(--display); font-weight: 800; font-size: 12.5px; letter-spacing: 0.16em; color: #cdf4ff; text-shadow: 0 1px 7px rgba(0,0,0,0.85); white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .rg-wb-arrow svg { animation: none; opacity: 0.85; } }
+  @media (max-width: 880px) { .rg-wb-arrow svg { width: 30px; height: 30px; } .rg-wb-label { font-size: 11px; } }
 
   /* ---- gate capture: name + email + marketing opt-in ---- */
   .rg-intro-capture { margin-top: 16px; margin-bottom: 14px; }

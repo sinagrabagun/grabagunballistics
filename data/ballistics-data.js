@@ -9,7 +9,7 @@
 window.BALLISTICS_DATA = [
   /* ---------------------------- RIMFIRE ---------------------------- */
   {
-    id: "22lr", name: ".22 LR", category: "Rimfire", diameter: 0.224,
+    id: "22lr", name: ".22 LR", category: "Rimfire", diameter: 0.224, defaultTwist: 16,
     fpsPerInch: 12, testBarrel: 24, defaultBarrel: 18,
     loads: [
       { mfr: "CCI", line: "Mini-Mag", grains: 40, bcG1: 0.138, mv: 1235, testBarrel: 24, type: "CPRN" },
@@ -29,7 +29,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "17hmr", name: ".17 HMR", category: "Rimfire", diameter: 0.172,
+    id: "17hmr", name: ".17 HMR", category: "Rimfire", diameter: 0.172, defaultTwist: 9,
     fpsPerInch: 18, testBarrel: 24, defaultBarrel: 22,
     loads: [
       { mfr: "Hornady", line: "V-MAX", grains: 17, bcG1: 0.125, mv: 2550, testBarrel: 24, type: "V-MAX" },
@@ -42,7 +42,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "22wmr", name: ".22 WMR", category: "Rimfire", diameter: 0.224,
+    id: "22wmr", name: ".22 WMR", category: "Rimfire", diameter: 0.224, defaultTwist: 16,
     fpsPerInch: 14, testBarrel: 24, defaultBarrel: 20,
     loads: [
       { mfr: "CCI", line: "Maxi-Mag", grains: 40, bcG1: 0.125, mv: 1875, testBarrel: 24, type: "JHP" },
@@ -58,7 +58,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- .20 / .22 CENTERFIRE ---------------------------- */
   {
-    id: "204ruger", name: ".204 Ruger", category: "Rifle", diameter: 0.204,
+    id: "204ruger", name: ".204 Ruger", category: "Rifle", diameter: 0.204, defaultTwist: 12,
     fpsPerInch: 28, testBarrel: 26, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Superformance NTX", grains: 24, bcG1: 0.170, mv: 4400, testBarrel: 26, type: "NTX" },
@@ -70,7 +70,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "223rem", name: ".223 Rem / 5.56 NATO", category: "Rifle", diameter: 0.224,
+    id: "223rem", name: ".223 Rem / 5.56 NATO", category: "Rifle", diameter: 0.224, defaultTwist: 8,
     fpsPerInch: 25, testBarrel: 24, defaultBarrel: 16,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 73, bcG1: 0.398, bcG7: 0.200, mv: 2790, testBarrel: 24, type: "ELD-M" },
@@ -95,7 +95,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "22arc", name: ".22 ARC", category: "Rifle", diameter: 0.224,
+    id: "22arc", name: ".22 ARC", category: "Rifle", diameter: 0.224, defaultTwist: 7,
     fpsPerInch: 25, testBarrel: 24, defaultBarrel: 18,
     loads: [
       { mfr: "Hornady", line: "V-Match ELD-VT", grains: 62, bcG1: 0.395, bcG7: 0.199, mv: 3300, testBarrel: 24, type: "ELD-VT" },
@@ -105,7 +105,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "224valkyrie", name: ".224 Valkyrie", category: "Rifle", diameter: 0.224,
+    id: "224valkyrie", name: ".224 Valkyrie", category: "Rifle", diameter: 0.224, defaultTwist: 7,
     fpsPerInch: 25, testBarrel: 24, defaultBarrel: 20,
     loads: [
       { mfr: "Federal", line: "Gold Medal Sierra MatchKing", grains: 90, bcG1: 0.563, bcG7: 0.274, mv: 2700, testBarrel: 24, type: "SMK" },
@@ -116,7 +116,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "22250", name: ".22-250 Rem", category: "Rifle", diameter: 0.224,
+    id: "22250", name: ".22-250 Rem", category: "Rifle", diameter: 0.224, defaultTwist: 12,
     fpsPerInch: 30, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Superformance V-MAX", grains: 50, bcG1: 0.242, mv: 4000, testBarrel: 24, type: "V-MAX" },
@@ -131,7 +131,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- 6mm / .243 ---------------------------- */
   {
-    id: "243win", name: ".243 Winchester", category: "Rifle", diameter: 0.243,
+    id: "243win", name: ".243 Winchester", category: "Rifle", diameter: 0.243, defaultTwist: 9,
     fpsPerInch: 28, testBarrel: 24, defaultBarrel: 22,
     loads: [
       { mfr: "Hornady", line: "ELD-X Precision Hunter", grains: 90, bcG1: 0.409, bcG7: 0.205, mv: 3150, testBarrel: 24, type: "ELD-X" },
@@ -146,7 +146,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "6arc", name: "6mm ARC", category: "Rifle", diameter: 0.243,
+    id: "6arc", name: "6mm ARC", category: "Rifle", diameter: 0.243, defaultTwist: 7.5,
     fpsPerInch: 25, testBarrel: 24, defaultBarrel: 18,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 108, bcG1: 0.536, bcG7: 0.270, mv: 2750, testBarrel: 24, type: "ELD-M" },
@@ -156,7 +156,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "6creedmoor", name: "6mm Creedmoor", category: "Rifle", diameter: 0.243,
+    id: "6creedmoor", name: "6mm Creedmoor", category: "Rifle", diameter: 0.243, defaultTwist: 7.5,
     fpsPerInch: 28, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 108, bcG1: 0.536, bcG7: 0.270, mv: 2960, testBarrel: 24, type: "ELD-M" },
@@ -170,7 +170,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- .25 cal ---------------------------- */
   {
-    id: "2506", name: ".25-06 Remington", category: "Rifle", diameter: 0.257,
+    id: "2506", name: ".25-06 Remington", category: "Rifle", diameter: 0.257, defaultTwist: 10,
     fpsPerInch: 28, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Precision Hunter ELD-X", grains: 110, bcG1: 0.465, bcG7: 0.233, mv: 3140, testBarrel: 24, type: "ELD-X" },
@@ -182,7 +182,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "257wby", name: ".257 Weatherby Magnum", category: "Magnum", diameter: 0.257,
+    id: "257wby", name: ".257 Weatherby Magnum", category: "Magnum", diameter: 0.257, defaultTwist: 10,
     fpsPerInch: 30, testBarrel: 26, defaultBarrel: 26,
     loads: [
       { mfr: "Weatherby", line: "Select Plus AccuBond", grains: 110, bcG1: 0.418, mv: 3460, testBarrel: 26, type: "AccuBond" },
@@ -193,7 +193,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- 6.5mm ---------------------------- */
   {
-    id: "65grendel", name: "6.5 Grendel", category: "Rifle", diameter: 0.264,
+    id: "65grendel", name: "6.5 Grendel", category: "Rifle", diameter: 0.264, defaultTwist: 8,
     fpsPerInch: 22, testBarrel: 24, defaultBarrel: 16,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 123, bcG1: 0.506, bcG7: 0.255, mv: 2580, testBarrel: 24, type: "ELD-M" },
@@ -204,7 +204,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "65creedmoor", name: "6.5 Creedmoor", category: "Rifle", diameter: 0.264,
+    id: "65creedmoor", name: "6.5 Creedmoor", category: "Rifle", diameter: 0.264, defaultTwist: 8,
     fpsPerInch: 26, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 140, bcG1: 0.610, bcG7: 0.315, mv: 2710, testBarrel: 24, type: "ELD-M" },
@@ -226,7 +226,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "65prc", name: "6.5 PRC", category: "Magnum", diameter: 0.264,
+    id: "65prc", name: "6.5 PRC", category: "Magnum", diameter: 0.264, defaultTwist: 8,
     fpsPerInch: 30, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 147, bcG1: 0.697, bcG7: 0.351, mv: 2910, testBarrel: 24, type: "ELD-M" },
@@ -240,7 +240,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- .270 / 6.8mm ---------------------------- */
   {
-    id: "68spc", name: "6.8 SPC", category: "Rifle", diameter: 0.277,
+    id: "68spc", name: "6.8 SPC", category: "Rifle", diameter: 0.277, defaultTwist: 11,
     fpsPerInch: 20, testBarrel: 16, defaultBarrel: 16,
     loads: [
       { mfr: "Hornady", line: "Black V-MAX", grains: 110, bcG1: 0.370, mv: 2550, testBarrel: 16, type: "V-MAX" },
@@ -251,7 +251,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "270win", name: ".270 Winchester", category: "Rifle", diameter: 0.277,
+    id: "270win", name: ".270 Winchester", category: "Rifle", diameter: 0.277, defaultTwist: 10,
     fpsPerInch: 28, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Precision Hunter ELD-X", grains: 145, bcG1: 0.536, bcG7: 0.268, mv: 2970, testBarrel: 24, type: "ELD-X" },
@@ -267,7 +267,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "68western", name: "6.8 Western", category: "Magnum", diameter: 0.277,
+    id: "68western", name: "6.8 Western", category: "Magnum", diameter: 0.277, defaultTwist: 8,
     fpsPerInch: 28, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Winchester", line: "Expedition Big Game LR", grains: 165, bcG1: 0.620, bcG7: 0.313, mv: 2970, testBarrel: 24, type: "AccuBond LR" },
@@ -279,7 +279,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- 7mm ---------------------------- */
   {
-    id: "7mm08", name: "7mm-08 Rem", category: "Rifle", diameter: 0.284,
+    id: "7mm08", name: "7mm-08 Rem", category: "Rifle", diameter: 0.284, defaultTwist: 9.5,
     fpsPerInch: 27, testBarrel: 24, defaultBarrel: 22,
     loads: [
       { mfr: "Hornady", line: "Precision Hunter ELD-X", grains: 150, bcG1: 0.574, bcG7: 0.286, mv: 2770, testBarrel: 24, type: "ELD-X" },
@@ -291,7 +291,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "280ai", name: ".280 Ackley Improved", category: "Rifle", diameter: 0.284,
+    id: "280ai", name: ".280 Ackley Improved", category: "Rifle", diameter: 0.284, defaultTwist: 9,
     fpsPerInch: 28, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Precision Hunter ELD-X", grains: 162, bcG1: 0.631, bcG7: 0.315, mv: 2850, testBarrel: 24, type: "ELD-X" },
@@ -301,7 +301,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "7remmag", name: "7mm Rem Magnum", category: "Magnum", diameter: 0.284,
+    id: "7remmag", name: "7mm Rem Magnum", category: "Magnum", diameter: 0.284, defaultTwist: 9,
     fpsPerInch: 30, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Precision Hunter ELD-X", grains: 162, bcG1: 0.631, bcG7: 0.315, mv: 2940, testBarrel: 24, type: "ELD-X" },
@@ -316,7 +316,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "7prc", name: "7mm PRC", category: "Magnum", diameter: 0.284,
+    id: "7prc", name: "7mm PRC", category: "Magnum", diameter: 0.284, defaultTwist: 8,
     fpsPerInch: 30, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 180, bcG1: 0.796, bcG7: 0.401, mv: 2975, testBarrel: 24, type: "ELD-M" },
@@ -329,7 +329,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "7300prc", name: "7mm-300 PRC (Wildcat)", category: "Magnum", diameter: 0.284,
+    id: "7300prc", name: "7mm-300 PRC (Wildcat)", category: "Magnum", diameter: 0.284, defaultTwist: 8,
     fpsPerInch: 32, testBarrel: 26, defaultBarrel: 26,
     /* Wildcat — .300 PRC necked to 7mm. No SAAMI spec or factory ammo;
        these are representative handloads from published builds. */
@@ -340,7 +340,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "28nosler", name: "28 Nosler", category: "Magnum", diameter: 0.284,
+    id: "28nosler", name: "28 Nosler", category: "Magnum", diameter: 0.284, defaultTwist: 9,
     fpsPerInch: 32, testBarrel: 26, defaultBarrel: 26,
     loads: [
       { mfr: "Nosler", line: "AccuBond Long Range", grains: 168, bcG1: 0.631, bcG7: 0.323, mv: 3125, testBarrel: 26, type: "ABLR" },
@@ -349,7 +349,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "7mmbackcountry", name: "7mm Backcountry", category: "Magnum", diameter: 0.284,
+    id: "7mmbackcountry", name: "7mm Backcountry", category: "Magnum", diameter: 0.284, defaultTwist: 8,
     fpsPerInch: 28, testBarrel: 20, defaultBarrel: 20,
     loads: [
       { mfr: "Federal", line: "Terminal Ascent", grains: 155, bcG1: 0.586, bcG7: 0.296, mv: 3150, testBarrel: 20, type: "Terminal Ascent · Peak Alloy" },
@@ -365,7 +365,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- .30 cal ---------------------------- */
   {
-    id: "3030", name: ".30-30 Winchester", category: "Lever", diameter: 0.308,
+    id: "3030", name: ".30-30 Winchester", category: "Lever", diameter: 0.308, defaultTwist: 12,
     fpsPerInch: 22, testBarrel: 24, defaultBarrel: 20,
     loads: [
       { mfr: "Hornady", line: "LEVERevolution FTX", grains: 160, bcG1: 0.330, mv: 2400, testBarrel: 24, type: "FTX" },
@@ -377,7 +377,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "308win", name: ".308 Winchester", category: "Rifle", diameter: 0.308,
+    id: "308win", name: ".308 Winchester", category: "Rifle", diameter: 0.308, defaultTwist: 10,
     fpsPerInch: 25, testBarrel: 24, defaultBarrel: 20,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 168, bcG1: 0.523, bcG7: 0.263, mv: 2700, testBarrel: 24, type: "ELD-M" },
@@ -402,7 +402,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "3006", name: ".30-06 Springfield", category: "Rifle", diameter: 0.308,
+    id: "3006", name: ".30-06 Springfield", category: "Rifle", diameter: 0.308, defaultTwist: 10,
     fpsPerInch: 26, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Precision Hunter ELD-X", grains: 178, bcG1: 0.552, bcG7: 0.277, mv: 2750, testBarrel: 24, type: "ELD-X" },
@@ -422,7 +422,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "300blk", name: ".300 AAC Blackout", category: "Rifle", diameter: 0.308,
+    id: "300blk", name: ".300 AAC Blackout", category: "Rifle", diameter: 0.308, defaultTwist: 8,
     fpsPerInch: 18, testBarrel: 16, defaultBarrel: 16,
     loads: [
       { mfr: "Hornady", line: "Black V-MAX", grains: 110, bcG1: 0.290, mv: 2375, testBarrel: 16, type: "V-MAX" },
@@ -437,7 +437,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "86blk", name: "8.6 Blackout", category: "Rifle", diameter: 0.338,
+    id: "86blk", name: "8.6 Blackout", category: "Rifle", diameter: 0.338, defaultTwist: 3,
     fpsPerInch: 15, testBarrel: 12, defaultBarrel: 12,
     loads: [
       { mfr: "Gorilla", line: "Barnes TSX", grains: 210, bcG1: 0.404, mv: 2040, testBarrel: 12, type: "TSX Supersonic" },
@@ -447,7 +447,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "300winmag", name: ".300 Winchester Magnum", category: "Magnum", diameter: 0.308,
+    id: "300winmag", name: ".300 Winchester Magnum", category: "Magnum", diameter: 0.308, defaultTwist: 10,
     fpsPerInch: 30, testBarrel: 24, defaultBarrel: 26,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 195, bcG1: 0.626, bcG7: 0.314, mv: 2930, testBarrel: 24, type: "ELD-M" },
@@ -463,7 +463,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "300prc", name: ".300 PRC", category: "Magnum", diameter: 0.308,
+    id: "300prc", name: ".300 PRC", category: "Magnum", diameter: 0.308, defaultTwist: 9,
     fpsPerInch: 30, testBarrel: 24, defaultBarrel: 26,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 225, bcG1: 0.777, bcG7: 0.391, mv: 2810, testBarrel: 24, type: "ELD-M" },
@@ -474,7 +474,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "300wsm", name: ".300 WSM", category: "Magnum", diameter: 0.308,
+    id: "300wsm", name: ".300 WSM", category: "Magnum", diameter: 0.308, defaultTwist: 10,
     fpsPerInch: 30, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Precision Hunter ELD-X", grains: 200, bcG1: 0.626, bcG7: 0.314, mv: 2790, testBarrel: 24, type: "ELD-X" },
@@ -486,7 +486,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- MILITARY / CLASSIC ---------------------------- */
   {
-    id: "762x39", name: "7.62x39mm", category: "Rifle", diameter: 0.310,
+    id: "762x39", name: "7.62x39mm", category: "Rifle", diameter: 0.310, defaultTwist: 9.5,
     fpsPerInch: 20, testBarrel: 16, defaultBarrel: 16,
     loads: [
       { mfr: "Hornady", line: "Black SST", grains: 123, bcG1: 0.295, mv: 2350, testBarrel: 16, type: "SST" },
@@ -499,7 +499,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "545x39", name: "5.45x39mm", category: "Rifle", diameter: 0.221,
+    id: "545x39", name: "5.45x39mm", category: "Rifle", diameter: 0.221, defaultTwist: 8,
     fpsPerInch: 20, testBarrel: 16, defaultBarrel: 16,
     loads: [
       { mfr: "Hornady", line: "Black V-MAX", grains: 60, bcG1: 0.265, mv: 2810, testBarrel: 16, type: "V-MAX" },
@@ -508,7 +508,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "762x54r", name: "7.62x54R", category: "Rifle", diameter: 0.311,
+    id: "762x54r", name: "7.62x54R", category: "Rifle", diameter: 0.311, defaultTwist: 9.5,
     fpsPerInch: 22, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Sellier & Bellot", line: "SP", grains: 180, bcG1: 0.411, mv: 2543, testBarrel: 24, type: "SP" },
@@ -518,7 +518,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "303brit", name: ".303 British", category: "Rifle", diameter: 0.312,
+    id: "303brit", name: ".303 British", category: "Rifle", diameter: 0.312, defaultTwist: 10,
     fpsPerInch: 22, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Custom InterLock", grains: 150, bcG1: 0.361, mv: 2685, testBarrel: 24, type: "InterLock SP" },
@@ -530,7 +530,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- BIG BORE / MAGNUM ---------------------------- */
   {
-    id: "338winmag", name: ".338 Winchester Magnum", category: "Magnum", diameter: 0.338,
+    id: "338winmag", name: ".338 Winchester Magnum", category: "Magnum", diameter: 0.338, defaultTwist: 10,
     fpsPerInch: 30, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Superformance SST", grains: 225, bcG1: 0.515, mv: 2840, testBarrel: 24, type: "SST" },
@@ -541,7 +541,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "338lapua", name: ".338 Lapua Magnum", category: "Magnum", diameter: 0.338,
+    id: "338lapua", name: ".338 Lapua Magnum", category: "Magnum", diameter: 0.338, defaultTwist: 9.4,
     fpsPerInch: 32, testBarrel: 27, defaultBarrel: 27,
     loads: [
       { mfr: "Hornady", line: "ELD Match", grains: 285, bcG1: 0.789, bcG7: 0.396, mv: 2745, testBarrel: 27, type: "ELD-M" },
@@ -552,7 +552,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "375hh", name: ".375 H&H Magnum", category: "Magnum", diameter: 0.375,
+    id: "375hh", name: ".375 H&H Magnum", category: "Magnum", diameter: 0.375, defaultTwist: 12,
     fpsPerInch: 30, testBarrel: 24, defaultBarrel: 24,
     loads: [
       { mfr: "Hornady", line: "Superformance", grains: 250, bcG1: 0.431, mv: 2890, testBarrel: 24, type: "GMX" },
@@ -562,7 +562,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "50bmg", name: ".50 BMG", category: "Magnum", diameter: 0.510,
+    id: "50bmg", name: ".50 BMG", category: "Magnum", diameter: 0.510, defaultTwist: 15,
     fpsPerInch: 25, testBarrel: 45, defaultBarrel: 29,
     loads: [
       { mfr: "Hornady", line: "A-MAX Match", grains: 750, bcG1: 1.050, bcG7: 0.525, mv: 2820, testBarrel: 45, type: "A-MAX" },
@@ -574,7 +574,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- LEVER ---------------------------- */
   {
-    id: "444marlin", name: ".444 Marlin", category: "Lever", diameter: 0.429,
+    id: "444marlin", name: ".444 Marlin", category: "Lever", diameter: 0.429, defaultTwist: 38,
     fpsPerInch: 22, testBarrel: 24, defaultBarrel: 22,
     loads: [
       { mfr: "Hornady", line: "LEVERevolution FTX", grains: 265, bcG1: 0.225, mv: 2325, testBarrel: 24, type: "FTX" },
@@ -583,7 +583,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "4570", name: ".45-70 Government", category: "Lever", diameter: 0.458,
+    id: "4570", name: ".45-70 Government", category: "Lever", diameter: 0.458, defaultTwist: 20,
     fpsPerInch: 20, testBarrel: 24, defaultBarrel: 22,
     loads: [
       { mfr: "Hornady", line: "LEVERevolution FTX", grains: 325, bcG1: 0.230, mv: 2050, testBarrel: 24, type: "FTX" },
@@ -597,7 +597,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- STRAIGHT-WALL ---------------------------- */
   {
-    id: "350legend", name: ".350 Legend", category: "Straight-Wall", diameter: 0.357,
+    id: "350legend", name: ".350 Legend", category: "Straight-Wall", diameter: 0.357, defaultTwist: 16,
     fpsPerInch: 20, testBarrel: 20, defaultBarrel: 18,
     loads: [
       { mfr: "Winchester", line: "Deer Season XP", grains: 150, bcG1: 0.223, mv: 2325, testBarrel: 20, type: "Extreme Point" },
@@ -609,7 +609,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "360buckhammer", name: ".360 Buckhammer", category: "Straight-Wall", diameter: 0.358,
+    id: "360buckhammer", name: ".360 Buckhammer", category: "Straight-Wall", diameter: 0.358, defaultTwist: 12,
     fpsPerInch: 20, testBarrel: 20, defaultBarrel: 20,
     loads: [
       { mfr: "Remington", line: "Core-Lokt", grains: 180, bcG1: 0.191, mv: 2400, testBarrel: 20, type: "SP" },
@@ -618,7 +618,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "400legend", name: ".400 Legend", category: "Straight-Wall", diameter: 0.400,
+    id: "400legend", name: ".400 Legend", category: "Straight-Wall", diameter: 0.400, defaultTwist: 14,
     fpsPerInch: 20, testBarrel: 20, defaultBarrel: 20,
     loads: [
       { mfr: "Winchester", line: "Power-Point", grains: 215, bcG1: 0.226, mv: 2250, testBarrel: 20, type: "PP" },
@@ -627,7 +627,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "450bushmaster", name: ".450 Bushmaster", category: "Straight-Wall", diameter: 0.452,
+    id: "450bushmaster", name: ".450 Bushmaster", category: "Straight-Wall", diameter: 0.452, defaultTwist: 24,
     fpsPerInch: 20, testBarrel: 20, defaultBarrel: 16,
     loads: [
       { mfr: "Hornady", line: "Black FTX", grains: 250, bcG1: 0.210, mv: 2200, testBarrel: 20, type: "FTX" },
@@ -641,7 +641,7 @@ window.BALLISTICS_DATA = [
 
   /* ---------------------------- HANDGUN ---------------------------- */
   {
-    id: "380acp", name: ".380 ACP", category: "Pistol", diameter: 0.355,
+    id: "380acp", name: ".380 ACP", category: "Pistol", diameter: 0.355, defaultTwist: 16,
     fpsPerInch: 20, testBarrel: 4, defaultBarrel: 4,
     loads: [
       { mfr: "Federal", line: "HST Micro", grains: 99, bcG1: 0.120, mv: 1030, testBarrel: 4, type: "JHP" },
@@ -653,7 +653,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "9mm", name: "9mm Luger", category: "Pistol", diameter: 0.355,
+    id: "9mm", name: "9mm Luger", category: "Pistol", diameter: 0.355, defaultTwist: 10,
     fpsPerInch: 25, testBarrel: 4, defaultBarrel: 4,
     loads: [
       { mfr: "Federal", line: "HST", grains: 124, bcG1: 0.165, mv: 1150, testBarrel: 4, type: "JHP" },
@@ -672,7 +672,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "357sig", name: ".357 SIG", category: "Pistol", diameter: 0.355,
+    id: "357sig", name: ".357 SIG", category: "Pistol", diameter: 0.355, defaultTwist: 16,
     fpsPerInch: 25, testBarrel: 4, defaultBarrel: 4,
     loads: [
       { mfr: "Speer", line: "Gold Dot", grains: 125, bcG1: 0.145, mv: 1375, testBarrel: 4, type: "JHP" },
@@ -682,7 +682,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "38spl", name: ".38 Special", category: "Pistol", diameter: 0.357,
+    id: "38spl", name: ".38 Special", category: "Pistol", diameter: 0.357, defaultTwist: 19,
     fpsPerInch: 22, testBarrel: 4, defaultBarrel: 4,
     loads: [
       { mfr: "Federal", line: "HST Micro +P", grains: 130, bcG1: 0.150, mv: 890, testBarrel: 4, type: "JHP" },
@@ -694,7 +694,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "357mag", name: ".357 Magnum", category: "Pistol", diameter: 0.357,
+    id: "357mag", name: ".357 Magnum", category: "Pistol", diameter: 0.357, defaultTwist: 19,
     fpsPerInch: 30, testBarrel: 6, defaultBarrel: 4,
     loads: [
       { mfr: "Federal", line: "Power-Shok", grains: 158, bcG1: 0.206, mv: 1240, testBarrel: 6, type: "JHP" },
@@ -706,7 +706,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "40sw", name: ".40 S&W", category: "Pistol", diameter: 0.400,
+    id: "40sw", name: ".40 S&W", category: "Pistol", diameter: 0.400, defaultTwist: 16,
     fpsPerInch: 22, testBarrel: 4, defaultBarrel: 4,
     loads: [
       { mfr: "Federal", line: "HST", grains: 180, bcG1: 0.164, mv: 1010, testBarrel: 4, type: "JHP" },
@@ -718,7 +718,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "10mm", name: "10mm Auto", category: "Pistol", diameter: 0.400,
+    id: "10mm", name: "10mm Auto", category: "Pistol", diameter: 0.400, defaultTwist: 16,
     fpsPerInch: 25, testBarrel: 5, defaultBarrel: 5,
     loads: [
       { mfr: "Federal", line: "HST", grains: 200, bcG1: 0.190, mv: 1130, testBarrel: 5, type: "JHP" },
@@ -730,7 +730,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "44mag", name: ".44 Magnum", category: "Pistol", diameter: 0.429,
+    id: "44mag", name: ".44 Magnum", category: "Pistol", diameter: 0.429, defaultTwist: 20,
     fpsPerInch: 28, testBarrel: 6, defaultBarrel: 6,
     loads: [
       { mfr: "Hornady", line: "Custom XTP", grains: 240, bcG1: 0.205, mv: 1350, testBarrel: 6, type: "XTP" },
@@ -740,7 +740,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "45acp", name: ".45 ACP", category: "Pistol", diameter: 0.451,
+    id: "45acp", name: ".45 ACP", category: "Pistol", diameter: 0.451, defaultTwist: 16,
     fpsPerInch: 18, testBarrel: 5, defaultBarrel: 5,
     loads: [
       { mfr: "Federal", line: "HST", grains: 230, bcG1: 0.195, mv: 890, testBarrel: 5, type: "JHP" },
@@ -753,7 +753,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "45colt", name: ".45 Colt", category: "Pistol", diameter: 0.452,
+    id: "45colt", name: ".45 Colt", category: "Pistol", diameter: 0.452, defaultTwist: 16,
     fpsPerInch: 20, testBarrel: 5.5, defaultBarrel: 5.5,
     loads: [
       { mfr: "Hornady", line: "Critical Defense", grains: 185, bcG1: 0.130, mv: 920, testBarrel: 5.5, type: "FTX" },
@@ -763,7 +763,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "57x28", name: "5.7x28mm", category: "Pistol", diameter: 0.224,
+    id: "57x28", name: "5.7x28mm", category: "Pistol", diameter: 0.224, defaultTwist: 9,
     fpsPerInch: 30, testBarrel: 5, defaultBarrel: 5,
     loads: [
       { mfr: "FN", line: "SS197SR", grains: 40, bcG1: 0.125, mv: 1700, testBarrel: 5, type: "V-MAX" },
@@ -773,7 +773,7 @@ window.BALLISTICS_DATA = [
     ]
   },
   {
-    id: "500sw", name: ".500 S&W Magnum", category: "Pistol", diameter: 0.500,
+    id: "500sw", name: ".500 S&W Magnum", category: "Pistol", diameter: 0.500, defaultTwist: 19,
     fpsPerInch: 30, testBarrel: 8.5, defaultBarrel: 8.5,
     loads: [
       { mfr: "Hornady", line: "Custom FTX", grains: 300, bcG1: 0.200, mv: 2075, testBarrel: 8.5, type: "FTX" },

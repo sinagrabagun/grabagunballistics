@@ -5,7 +5,7 @@
    the holdover-call strip. Reuses the real solver + TrajectoryCompareChart + Reticle.
    Exposes window.HeroBallistics. */
 (function () {
-  const { useState, useMemo, useRef } = React;
+  const { useState, useMemo, useRef, useEffect } = React;
 
   const nz = (v, d) => { let s = v.toFixed(d); if (/^-0(\.0+)?$/.test(s)) s = s.slice(1); return s; };
 
@@ -17,6 +17,11 @@
   const ADD_ORDER = ["308win", "65creedmoor", "300winmag", "6creedmoor", "270win", "3006", "7remmag", "223rem"];
 
   let _uid = 0;
+
+  // persist the planner so switching modes / reloading keeps the user's setup
+  const PLANNER_LS = "gag_planner_v1";
+  function loadPlanner() { try { const v = localStorage.getItem(PLANNER_LS); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function savePlanner(o) { try { localStorage.setItem(PLANNER_LS, JSON.stringify(o)); } catch (e) {} }
 
   // Prefer a sensible supersonic hunting/match load as the default for a caliber.
   function defaultLoadIdx(cal) {
@@ -39,12 +44,21 @@
 
   function HeroBallistics({ metric, data, onOpenLab }) {
     // comparison stack. entry[0] starts active. Each entry = a caliber line.
-    const [entries, setEntries] = useState(() => [makeEntry("65creedmoor", data, PALETTE[0])]);
-    const [activeId, setActiveId] = useState(() => entries[0].id);
+    const saved = useRef(loadPlanner()).current;
+    const [entries, setEntries] = useState(() => {
+      if (saved && Array.isArray(saved.entries) && saved.entries.length) {
+        const valid = saved.entries.filter(e => data.find(c => c.id === e.caliberId));
+        if (valid.length) { _uid = Math.max(_uid, ...valid.map(e => e.id || 0)); return valid; }
+      }
+      return [makeEntry("65creedmoor", data, PALETTE[0])];
+    });
+    const [activeId, setActiveId] = useState(() => (saved && entries.some(e => e.id === saved.activeId)) ? saved.activeId : entries[0].id);
     // shared comparison frame — applied to every line so axes are identical.
-    const [zeroRange, setZeroRange] = useState(100);
-    const [scopeUnit, setScopeUnit] = useState("MIL");
-    const [maxRange, setMaxRange] = useState(500);
+    const [zeroRange, setZeroRange] = useState(() => (saved && saved.zeroRange != null) ? saved.zeroRange : 100);
+    const [scopeUnit, setScopeUnit] = useState(() => (saved && saved.scopeUnit) ? saved.scopeUnit : "MIL");
+    const [maxRange, setMaxRange] = useState(() => (saved && saved.maxRange != null) ? saved.maxRange : 500);
+    const [sightHeight, setSightHeight] = useState(() => (saved && saved.sightHeight != null) ? saved.sightHeight : 1.8);
+    useEffect(() => { savePlanner({ entries, activeId, zeroRange, scopeUnit, maxRange, sightHeight }); }, [entries, activeId, zeroRange, scopeUnit, maxRange, sightHeight]);
 
     const active = entries.find(e => e.id === activeId) || entries[0];
     const activeCal = data.find(c => c.id === active.caliberId);
@@ -99,12 +113,12 @@
       const result = window.BallisticsSolver.solve({
         bcG1: load.bcG1, bcG7: load.bcG7, dragModel,
         muzzleVelocity: mv, bulletWeight: load.grains,
-        sightHeight: 1.8, zeroRange, shootingAngle: 0,
+        sightHeight, zeroRange, shootingAngle: 0,
         windSpeed: 0, windDir: 12, tempF: 59, altitudeFt: 0,
         maxRange, increment: maxRange > 300 ? 100 : 50
       });
       return { ...en, cal, load, mv, result, label: cal.name };
-    }), [entries, zeroRange, maxRange, data]);
+    }), [entries, zeroRange, maxRange, sightHeight, data]);
 
     const activeSolved = solved.find(s => s.id === active.id) || solved[0];
     const reticleType = scopeUnit === "MIL" ? "MIL Grid" : "MOA Grid";
@@ -117,10 +131,11 @@
     }, [data]);
 
     const comparing = entries.length > 1;
-    const rangeOpts = activeCal.category === "Pistol" ? [100, 150, 200]
-      : activeCal.category === "Rimfire" ? [150, 200, 300]
-      : ["Lever", "Straight-Wall"].includes(activeCal.category) ? [200, 300, 500]
-      : [300, 500, 700];
+    const rangeMax = activeCal.category === "Pistol" ? 300
+      : activeCal.category === "Rimfire" ? 500
+      : ["Lever", "Straight-Wall"].includes(activeCal.category) ? 700
+      : 1500;
+    const rangeMin = activeCal.category === "Pistol" ? 50 : 100;
 
     return (
       <section className="hero">
@@ -160,16 +175,20 @@
             <input type="range" min="4" max={activeCal.id === "50bmg" ? 45 : (activeCal.category === "Pistol" ? 10 : 30)} step="0.5"
               value={active.barrel} onChange={(e) => updateActive({ barrel: parseFloat(e.target.value) })} />
           </label>
+          <label className="hctl hctl-barrel">
+            <span>Optic height {comparing && <em className="hctl-shared">all</em>} <b className="mono">{(metric ? sightHeight * 2.54 : sightHeight).toFixed(1)}{lenUnit}</b></span>
+            <input type="range" min="0.5" max="4" step="0.1" value={sightHeight} onChange={(e) => setSightHeight(parseFloat(e.target.value))} />
+          </label>
           <label className="hctl hctl-narrow">
-            <span>Zero <em className="hctl-shared">all</em></span>
+            <span>Zero {comparing && <em className="hctl-shared">all</em>}</span>
             <div className="seg-mini">
-              {[50, 100, 200].map(z => (
+              {[36, 50, 100, 200].map(z => (
                 <button key={z} type="button" className={zeroRange === z ? "active" : ""} onClick={() => setZeroRange(z)}>{metric ? Math.round(z * 0.9144) : z}</button>
               ))}
             </div>
           </label>
           <label className="hctl hctl-narrow">
-            <span>Optic <em className="hctl-shared">all</em></span>
+            <span>Optic {comparing && <em className="hctl-shared">all</em>}</span>
             <div className="seg-mini">
               {["MIL", "MOA"].map(u => (
                 <button key={u} type="button" className={scopeUnit === u ? "active" : ""} onClick={() => setScopeUnit(u)}>{u}</button>
@@ -206,9 +225,10 @@
               <h3>{comparing ? "Bullet drop · shared scale" : "Bullet drop"}</h3>
               <div className="hp-range">
                 <span>Show to</span>
-                {rangeOpts.map(d => (
-                  <button key={d} type="button" className={maxRange === d ? "active" : ""} onClick={() => setMaxRange(d)}>{metric ? Math.round(d * 0.9144) : d}{distUnit}</button>
-                ))}
+                <input type="range" min={rangeMin} max={rangeMax} step="50"
+                  value={Math.min(maxRange, rangeMax)} onChange={(e) => setMaxRange(parseInt(e.target.value))}
+                  aria-label="Chart max range" />
+                <b className="mono">{metric ? Math.round(maxRange * 0.9144) : maxRange}{distUnit}</b>
               </div>
             </div>
             <window.TrajectoryCompareChart series={solved} metric={metric} zeroRange={zeroRange} maxRange={maxRange} />
@@ -233,7 +253,7 @@
               </div>
             ))}
           </div>
-          <button className="hc-lab" onClick={() => onOpenLab({ caliber: activeCal, load: activeSolved.load, barrelLength: active.barrel, zeroRange, maxRange, scopeUnit, reticleType })}>
+          <button className="hc-lab" onClick={() => onOpenLab({ caliber: activeCal, load: activeSolved.load, barrelLength: active.barrel, zeroRange, maxRange, scopeUnit, reticleType, sightHeight })}>
             Full ballistics &amp; wind →
           </button>
         </div>

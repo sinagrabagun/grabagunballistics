@@ -2,12 +2,17 @@
 (function () {
   const { useState, useMemo } = React;
 
+  // persist user settings across mode switches & reloads
+  function loadLS(k) { try { const v = localStorage.getItem(k); return v == null ? null : JSON.parse(v); } catch (e) { return null; } }
+  function saveLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
   const nz = (v, d) => { let s = v.toFixed(d); if (/^-0(\.0+)?$/.test(s)) s = s.slice(1); return s; };
 
   const DEFAULTS = {
     caliberId: "65creedmoor",
     mfr: "Hornady", line: "ELD Match", loadIdx: 0,
-    barrelLength: 24, mvOverride: null,
+    barrelLength: 24, mvOverride: null, bcOverride: null,
+    twist: 8, showSpinDrift: true,
     zeroRange: 100, sightHeight: 1.5, shootingAngle: 0,
     windSpeed: 10, windDir: 3,
     tempF: 59, altitudeFt: 0,
@@ -165,10 +170,10 @@
   function App() {
     const [t, setTweak] = window.useTweaks(TWEAK_DEFAULTS);
     const urlInit = React.useRef(readUrl()).current;
-    const [mode, setMode] = useState(urlInit.mode || "hunt");
+    const [mode, setMode] = useState(urlInit.mode || loadLS("gag_mode") || "hunt");
     const [adminOpen, setAdminOpen] = useState(false);
-    const [state, setState] = useState(DEFAULTS);
-    const [metric, setMetric] = useState(false);
+    const [state, setState] = useState(() => ({ ...DEFAULTS, ...(loadLS("gag_lab_state") || {}) }));
+    const [metric, setMetric] = useState(() => { const v = loadLS("gag_metric"); return v == null ? false : !!v; });
     const [tab, setTab] = useState("Trajectory");
     const [inputsOpen, setInputsOpen] = useState(false);
     const data = window.BALLISTICS_DATA;
@@ -185,6 +190,9 @@
         loadIdx: Math.max(0, idx),
         barrelLength: rec.barrelLength != null ? rec.barrelLength : cal.defaultBarrel,
         mvOverride: null,
+        bcOverride: null,
+        twist: cal.defaultTwist != null ? cal.defaultTwist : s.twist,
+        sightHeight: rec.sightHeight != null ? rec.sightHeight : s.sightHeight,
         zeroRange: rec.zeroRange != null ? rec.zeroRange : s.zeroRange,
         scopeUnit: rec.scopeUnit || s.scopeUnit,
         reticleType: rec.reticleType || s.reticleType,
@@ -201,19 +209,25 @@
     const computedMV = window.BallisticsSolver.adjustMV(load.mv, load.testBarrel, state.barrelLength, cal.fpsPerInch);
     const activeMV = state.mvOverride != null ? state.mvOverride : computedMV;
     const dragModel = state.dragModel === "Auto" ? (load.bcG7 ? "G7" : "G1") : state.dragModel;
+    const useG7 = dragModel === "G7";
+    const effBcG1 = (state.bcOverride != null && !useG7) ? state.bcOverride : load.bcG1;
+    const effBcG7 = (state.bcOverride != null && useG7) ? state.bcOverride : load.bcG7;
+    const activeBC = useG7 ? (effBcG7 || effBcG1) : effBcG1;
 
     const result = useMemo(() => {
       return window.BallisticsSolver.solve({
-        bcG1: load.bcG1, bcG7: load.bcG7, dragModel,
+        bcG1: effBcG1, bcG7: effBcG7, dragModel,
         muzzleVelocity: activeMV, bulletWeight: load.grains,
         sightHeight: state.sightHeight, zeroRange: state.zeroRange,
         shootingAngle: state.shootingAngle,
         windSpeed: state.showWind ? state.windSpeed : 0, windDir: state.windDir,
         tempF: state.tempF, altitudeFt: state.altitudeFt,
+        twist: state.twist, diameter: cal.diameter, spinDrift: state.showSpinDrift,
         maxRange: state.maxRange, increment: state.increment
       });
-    }, [load, dragModel, activeMV, state.sightHeight, state.zeroRange, state.shootingAngle,
+    }, [load, dragModel, effBcG1, effBcG7, activeMV, state.sightHeight, state.zeroRange, state.shootingAngle,
         state.showWind, state.windSpeed, state.windDir, state.tempF, state.altitudeFt,
+        cal.diameter, state.twist, state.showSpinDrift,
         state.maxRange, state.increment]);
 
     // summary values
@@ -232,8 +246,12 @@
       document.body.dataset.density = t.density;
     }, [t.accent, t.accent2, t.density]);
 
+    React.useEffect(() => { saveLS("gag_lab_state", state); }, [state]);
+    React.useEffect(() => { saveLS("gag_metric", metric); }, [metric]);
+    React.useEffect(() => { saveLS("gag_mode", mode); }, [mode]);
+
     const holds = result.rows.filter(r => r.rangeYd > 0);
-    const holdSubset = holds.length > 9 ? holds.filter((_, i) => i % Math.ceil(holds.length / 8) === 0) : holds;
+    const holdSubset = holds;   // honor the chosen table step exactly (no decimation)
 
     return (
       <div className="app" data-mode={mode}>
@@ -263,8 +281,8 @@
           )}
           <div className="topbar-right">
             <div className="unit-toggle">
-              <button className={!metric ? "active" : ""} onClick={() => setMetric(false)}>Imperial</button>
-              <button className={metric ? "active" : ""} onClick={() => setMetric(true)}>Metric</button>
+              <button className={!metric ? "active" : ""} onClick={() => setMetric(false)}>Yards</button>
+              <button className={metric ? "active" : ""} onClick={() => setMetric(true)}>Meters</button>
             </div>
           </div>
         </header>
@@ -272,6 +290,11 @@
         {mode === "hunt" ? (
           <main className="hunt-page">
             <window.HeroBallistics metric={metric} data={data} onOpenLab={openLab} />
+            <a className="hp-ad" href="https://grabagun.com/ammo-subscription" target="_blank" rel="noopener noreferrer">
+              <img src="assets/ammo-subscription.png" alt="GrabAGun Ammo Subscription — never run dry" />
+              <span className="rg-ad-tag">Ad</span>
+              <span className="rg-ad-cta">Never run dry — subscribe &amp; save <span className="rg-ad-arrow">→</span></span>
+            </a>
             <footer className="methodology">
               <span>3-DOF point-mass solver · advertised factory velocities adjusted for barrel length. Verify against your own chronograph &amp; drops before relying on a firing solution.</span>
             </footer>
@@ -304,7 +327,7 @@
               <StatCard label="Muzzle vel" value={Math.round(window.U.vel.to(activeMV, metric))} unit={" " + velUnit}
                 sub={state.mvOverride != null ? "override" : state.barrelLength + '" barrel'} />
               <StatCard label="Zero" value={metric ? Math.round(state.zeroRange * 0.9144) : state.zeroRange} unit={" " + distUnit}
-                sub={dragModel + " · BC " + (dragModel === "G7" ? (load.bcG7 || load.bcG1) : load.bcG1).toFixed(3)} />
+                sub={dragModel + " · BC " + activeBC.toFixed(3) + (state.bcOverride != null ? " trued" : "")} />
               <StatCard label={"Drop @ " + (metric ? Math.round(state.maxRange * 0.9144) : state.maxRange) + distUnit}
                 value={(window.U.len.to(last.dropIn, metric)).toFixed(1)} unit={" " + lenUnit}
                 sub={Math.abs(lastDial).toFixed(moaOrMil === "MIL" ? 1 : 1) + " " + moaOrMil + " come-up"} />

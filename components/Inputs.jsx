@@ -26,9 +26,10 @@
     );
   }
 
-  function NumberInput({ value, onChange, conv, metric, step, min, max }) {
+  function NumberInput({ value, onChange, conv, metric, step, min, max, decimals }) {
     const disp = conv ? conv.to(value, metric) : value;
-    const rounded = Math.round(disp * 100) / 100;
+    const f = Math.pow(10, decimals != null ? decimals : 2);
+    const rounded = Math.round(disp * f) / f;
     const commit = (nextDisp) => {
       let v = nextDisp;
       if (min != null) v = Math.max(min, v);
@@ -118,19 +119,20 @@
       const c = data.find(x => x.id === id);
       const m = c.loads[0].mfr;
       const ln = c.loads.find(l => l.mfr === m).line;
-      set({ caliberId: id, mfr: m, line: ln, loadIdx: 0, barrelLength: c.defaultBarrel, mvOverride: null });
+      set({ caliberId: id, mfr: m, line: ln, loadIdx: 0, barrelLength: c.defaultBarrel, mvOverride: null, bcOverride: null, twist: c.defaultTwist != null ? c.defaultTwist : 10 });
     }
     function chooseMfr(m) {
       const ln = cal.loads.find(l => l.mfr === m).line;
-      set({ mfr: m, line: ln, loadIdx: 0, mvOverride: null });
+      set({ mfr: m, line: ln, loadIdx: 0, mvOverride: null, bcOverride: null });
     }
-    function chooseLine(ln) { set({ line: ln, loadIdx: 0, mvOverride: null }); }
-    function chooseLoad(i) { set({ loadIdx: i, mvOverride: null }); }
+    function chooseLine(ln) { set({ line: ln, loadIdx: 0, mvOverride: null, bcOverride: null }); }
+    function chooseLoad(i) { set({ loadIdx: i, mvOverride: null, bcOverride: null }); }
 
     const computedMV = window.BallisticsSolver.adjustMV(load.mv, load.testBarrel, state.barrelLength, cal.fpsPerInch);
     const activeMV = state.mvOverride != null ? state.mvOverride : computedMV;
     const dragModel = state.dragModel === "Auto" ? (load.bcG7 ? "G7" : "G1") : state.dragModel;
     const activeBC = dragModel === "G7" ? (load.bcG7 || load.bcG1) : load.bcG1;
+    const stab = window.BallisticsSolver.stability(state.twist, cal.diameter, load.grains, activeMV);
 
     return (
       <div className="input-panel">
@@ -176,13 +178,13 @@
         {/* RIFLE */}
         <section className="grp">
           <h3 className="grp-title">Rifle &amp; Optic Setup</h3>
-          <Field label="Barrel length" hint="adjusts velocity">
+          <Field label="Velocity correction" hint="barrel-length model">
             <Slider value={state.barrelLength} onChange={(v) => set({ barrelLength: v, mvOverride: null })}
               min={4} max={cal.category === "Pistol" ? 10 : (cal.id === "50bmg" ? 45 : 30)} step={0.5}
-              fmt={(v) => v.toFixed(1) + '"'} />
+              fmt={(v) => Math.round(U.vel.to(window.BallisticsSolver.adjustMV(load.mv, load.testBarrel, v, cal.fpsPerInch), metric)) + " " + U.vel.unit(metric)} />
           </Field>
           <div className="vel-note">
-            {cal.fpsPerInch} fps/inch · test {load.testBarrel}" → {Math.round(computedMV)} fps at {state.barrelLength}"
+            {state.barrelLength.toFixed(1)}" barrel approximation · {cal.fpsPerInch} fps/in from {load.testBarrel}" test barrel
           </div>
           <Field label="Muzzle velocity override">
             <div className="override-row">
@@ -192,11 +194,20 @@
                 step={5} min={200} max={5000} />
             </div>
           </Field>
+          <Field label={"True BC · " + dragModel} hint="match your drops">
+            <div className="override-row">
+              <input type="checkbox" checked={state.bcOverride != null}
+                onChange={(e) => set({ bcOverride: e.target.checked ? activeBC : null })} />
+              <NumberInput value={state.bcOverride != null ? state.bcOverride : activeBC} onChange={(v) => set({ bcOverride: v })}
+                step={0.001} min={0.05} max={1.5} decimals={3} />
+            </div>
+          </Field>
+          <div className="vel-note">{state.bcOverride != null ? "Solving on your trued " + dragModel + " BC of " + state.bcOverride.toFixed(3) : "Factory " + dragModel + " BC " + activeBC.toFixed(3) + " — tick to true it to your observed drops"}</div>
           <div className="two-col">
             <Field label="Zero range">
               <NumberInput value={state.zeroRange} onChange={(v) => set({ zeroRange: Math.round(v) })} conv={U.dist} metric={metric} step={5} min={10} max={500} />
             </Field>
-            <Field label="Sight height">
+            <Field label="Optic height" hint="over bore">
               <NumberInput value={state.sightHeight} onChange={(v) => set({ sightHeight: v })} conv={U.len} metric={metric} step={0.1} min={0.5} max={4} />
             </Field>
           </div>
@@ -204,6 +215,14 @@
             <Slider value={state.shootingAngle} onChange={(v) => set({ shootingAngle: v })} min={-60} max={60} step={1}
               fmt={(v) => (v > 0 ? "+" : "") + v + "°"} />
           </Field>
+          <Field label="Barrel twist" hint="1 turn in N inches">
+            <NumberInput value={state.twist} onChange={(v) => set({ twist: v })} step={0.5} min={3} max={40} />
+          </Field>
+          <div className="vel-note">
+            {stab
+              ? "1:" + (Math.round(state.twist * 10) / 10) + '" · stability SG ' + stab.sg.toFixed(2) + " · " + (stab.sg >= 1.5 ? "well stabilized" : stab.sg >= 1.0 ? "marginal" : "under-stabilized") + " · est. length " + stab.lengthIn.toFixed(2) + '"'
+              : "Enter barrel twist for a stability estimate."}
+          </div>
         </section>
 
         {/* ENVIRONMENT */}
@@ -260,7 +279,7 @@
               </select>
             </Field>
             <Field label="Drag model">
-              <select className="select" value={state.dragModel} onChange={(e) => set({ dragModel: e.target.value })}>
+              <select className="select" value={state.dragModel} onChange={(e) => set({ dragModel: e.target.value, bcOverride: null })}>
                 <option value="Auto">Auto ({load.bcG7 ? "G7" : "G1"})</option>
                 <option value="G1">G1</option>
                 {load.bcG7 && <option value="G7">G7</option>}
@@ -270,6 +289,10 @@
           <label className="toggle-row">
             <input type="checkbox" checked={state.showWind} onChange={(e) => set({ showWind: e.target.checked })} />
             <span>Apply wind to reticle &amp; trajectory holds</span>
+          </label>
+          <label className="toggle-row">
+            <input type="checkbox" checked={state.showSpinDrift} onChange={(e) => set({ showSpinDrift: e.target.checked })} />
+            <span>Apply spin drift to holds</span>
           </label>
         </section>
       </div>

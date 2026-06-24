@@ -71,7 +71,9 @@
       return {
         caliberId: cal.id, mfr: load.mfr, line: load.line,
         loadIdx: Math.max(0, loads.indexOf(load)),
-        barrel: state.barrelLength, zeroRange: state.zeroRange, scopeUnit: state.scopeUnit
+        barrel: state.barrelLength, zeroRange: state.zeroRange, scopeUnit: state.scopeUnit,
+        sightHeight: state.sightHeight != null ? state.sightHeight : 1.8,
+        twist: cal.defaultTwist != null ? cal.defaultTwist : 10
       };
     });
     const gcal = data.find(c => c.id === cfg.caliberId);
@@ -82,7 +84,7 @@
     const scopeUnit = cfg.scopeUnit;
     const groups = useMemo(() => { const g = {}; data.forEach(c => { (g[c.category] = g[c.category] || []).push(c); }); return g; }, [data]);
 
-    function chooseCaliber(id) { const c = data.find(x => x.id === id); const m = c.loads[0].mfr; const ln = c.loads.find(l => l.mfr === m).line; setCfg(s => ({ ...s, caliberId: id, mfr: m, line: ln, loadIdx: 0, barrel: c.defaultBarrel })); }
+    function chooseCaliber(id) { const c = data.find(x => x.id === id); const m = c.loads[0].mfr; const ln = c.loads.find(l => l.mfr === m).line; setCfg(s => ({ ...s, caliberId: id, mfr: m, line: ln, loadIdx: 0, barrel: c.defaultBarrel, twist: c.defaultTwist != null ? c.defaultTwist : 10 })); }
     function chooseMfr(m) { const ln = gcal.loads.find(l => l.mfr === m).line; setCfg(s => ({ ...s, mfr: m, line: ln, loadIdx: 0 })); }
     function chooseLine(ln) { setCfg(s => ({ ...s, line: ln, loadIdx: 0 })); }
 
@@ -110,10 +112,10 @@
     const result = useMemo(() => window.BallisticsSolver.solve({
       bcG1: gload.bcG1, bcG7: gload.bcG7, dragModel,
       muzzleVelocity: activeMV, bulletWeight: gload.grains,
-      sightHeight: 1.8, zeroRange: cfg.zeroRange,
+      sightHeight: cfg.sightHeight, zeroRange: cfg.zeroRange,
       shootingAngle: 0, windSpeed: wind.spd, windDir: wind.hour,
-      tempF: 59, altitudeFt: 0, maxRange: 1000, increment: 25
-    }), [gload, dragModel, activeMV, cfg.zeroRange, wind]);
+      tempF: 59, altitudeFt: 0, twist: cfg.twist, diameter: gcal.diameter, spinDrift: true, maxRange: 1000, increment: 25
+    }), [gload, dragModel, activeMV, cfg.zeroRange, cfg.sightHeight, cfg.twist, gcal, wind]);
 
     const holds = useMemo(() => course.map(r => {
       const row = result.rows.find(x => x.rangeYd === r) || result.rows[result.rows.length - 1];
@@ -204,14 +206,15 @@
       if (submitting) return;
       const nm = (nameInput || "").trim().slice(0, 18).toUpperCase() || "ANON";
       try { localStorage.setItem("gag_range_name", nm); } catch (e) {}
-      const entry = { name: nm, score: finalScore, hits, ts: Date.now() };
+      const rig = gcal.name + " · " + gload.grains + "gr " + gload.line;
+      const entry = { name: nm, score: finalScore, hits, ts: Date.now(), caliber: rig };
       const logLocal = () => {
         const b = { month: monthKey(), entries: [...board.entries, entry].sort((a, x) => x.score - a.score).slice(0, 50) };
         setBoard(b); saveBoard(b); setSubmitted(entry);
       };
       if (!lbOn) { logLocal(); return; }
       setSubmitting(true);
-      window.Leaderboard.submit({ name: nm, score: finalScore, hits, month: monthKey(), caliber: gcal.name })
+      window.Leaderboard.submit({ name: nm, score: finalScore, hits, month: monthKey(), caliber: rig })
         .then(async (row) => {
           const [r, b] = await Promise.all([
             window.Leaderboard.rank(monthKey(), finalScore),
@@ -282,6 +285,7 @@
     const distUnit = metric ? "m" : "yd";
     const rangeDisp = metric ? Math.round(cur.range * 0.9144) : cur.range;
     const curWind = windSeq[stationIdx] || wind.spd;   // actual wind for this shot — shown accurately in the call
+    const pushRight = !(wind.hour >= 1 && wind.hour <= 5);   // wind from the left half pushes the bullet right
 
     // ===================== INTRO / PROMO HERO POPUP =====================
     if (phase === "intro") {
@@ -311,9 +315,8 @@
                 {capErr && <div className="rg-cap-err">{capErr}</div>}
               </div>
 
-              <button className="rg-intro-start" onClick={() => gateThen(() => restart())}><window.UI.Icon name="crosshair" size={17} /> TEST YOUR SETUP</button>
-              <button className="rg-intro-setup" onClick={() => gateThen(() => setPhase("setup"))}>Build / edit your rig first ⟶</button>
-              <p className="rg-cap-fine">We use your name &amp; email to notify the Top 5 prize winners after July 31. Marketing emails only if you opt in above — unsubscribe anytime.</p>
+              <button className="rg-intro-start" onClick={() => gateThen(() => setPhase("setup"))}><window.UI.Icon name="crosshair" size={17} /> BUILD YOUR RIG &rarr;</button>
+              <p className="rg-cap-fine">Step 1: dial in your exact rifle, load &amp; optic and study your dope &mdash; then start the course. We use your name &amp; email to notify the Top 5 prize winners after July 31. Marketing emails only if you opt in above &mdash; unsubscribe anytime.</p>
 
               <div className="rg-intro-info">
                 <div className="rg-intro-rulesbox">
@@ -345,7 +348,7 @@
     if (phase === "setup") {
       return (
         <div className="rg-setupwrap">
-          <window.UI.Eyebrow icon="crosshair" label="Test Your Setup"
+          <window.UI.Eyebrow icon="crosshair" label="Step 1 of 2 · Build Your Rig"
             title="Build your rig, review your dope, then test your holds"
             desc="Dial in the exact rifle, load and optic you run. Study the holdover tree below — then the course hides it and you shoot from memory." />
 
@@ -376,10 +379,18 @@
               </label>
               <div className="rg-field2">
                 <label className="rg-field"><span>Zero range</span>
-                  <div className="seg-mini">{[50, 100, 200].map(z => <button key={z} type="button" className={cfg.zeroRange === z ? "active" : ""} onClick={() => setCfg(s => ({ ...s, zeroRange: z }))}>{z}</button>)}</div>
+                  <div className="seg-mini">{[36, 50, 100, 200, 300].map(z => <button key={z} type="button" className={cfg.zeroRange === z ? "active" : ""} onClick={() => setCfg(s => ({ ...s, zeroRange: z }))}>{z}</button>)}</div>
                 </label>
                 <label className="rg-field"><span>Optic</span>
                   <div className="seg-mini">{["MIL", "MOA"].map(u => <button key={u} type="button" className={cfg.scopeUnit === u ? "active" : ""} onClick={() => setCfg(s => ({ ...s, scopeUnit: u }))}>{u}</button>)}</div>
+                </label>
+              </div>
+              <div className="rg-field2">
+                <label className="rg-field"><span>Optic height <b className="mono">{cfg.sightHeight.toFixed(1)}"</b></span>
+                  <input type="range" min="0.5" max="4" step="0.1" value={cfg.sightHeight} onChange={e => setCfg(s => ({ ...s, sightHeight: parseFloat(e.target.value) }))} />
+                </label>
+                <label className="rg-field"><span>Barrel twist <b className="mono">1:{cfg.twist}</b></span>
+                  <input type="range" min="3" max="20" step="0.5" value={cfg.twist} onChange={e => setCfg(s => ({ ...s, twist: parseFloat(e.target.value) }))} />
                 </label>
               </div>
               <div className="rg-cfg-spec">
@@ -473,7 +484,12 @@
               <div className="rg-wind-meta">
                 <div className="rg-wind-spd mono">{curWind}<em>mph</em></div>
                 <div className="rg-wind-dir">{wind.hour} o'clock</div>
-                <div className="rg-wind-push">pushes {windPush(wind.hour)}</div>
+                <div className={"rg-windflow " + (pushRight ? "to-right" : "to-left")} title={"Wind pushes " + windPush(wind.hour)} aria-label={"Wind pushes " + windPush(wind.hour)}>
+                  <span className="rg-wf"></span>
+                  <span className="rg-wf"></span>
+                  <span className="rg-wf"></span>
+                  <svg className="rg-wf-head" viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M3 2 L8.5 6 L3 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+                </div>
                 <div className="rg-wind-gust">live call · shifts each shot</div>
               </div>
             </div>
@@ -587,7 +603,16 @@
           <div className="rg-hud rg-hud-tr">
             <span className="rg-hud-windv mono">{curWind} MPH</span>
             <span className="rg-hud-windd">{wind.hour} O'CLOCK</span>
-            <span className="rg-hud-windpush">PUSHES {windPush(wind.hour)}</span>
+            <span className="rg-hud-windpush">{pushRight ? "DRIFT →" : "← DRIFT"}</span>
+          </div>
+          <div className={"rg-windbig " + (pushRight ? "to-right" : "to-left")} aria-hidden="true">
+            <div className="rg-wb-arrow">
+              <svg viewBox="0 0 24 24" width="40" height="40"><path d="M8 4 L17 12 L8 20" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+              <svg viewBox="0 0 24 24" width="40" height="40"><path d="M8 4 L17 12 L8 20" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+              <svg viewBox="0 0 24 24" width="40" height="40"><path d="M8 4 L17 12 L8 20" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+              <svg viewBox="0 0 24 24" width="40" height="40"><path d="M8 4 L17 12 L8 20" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+            </div>
+            <div className="rg-wb-label">WIND · {curWind} MPH · {wind.hour} O'CLOCK</div>
           </div>
           <div className="rg-zoom">
             <span>ZOOM</span>
@@ -630,7 +655,7 @@
                 {top.map((e, i) => (
                   <div className={"rg-lb-row r" + (i + 1)} key={globalMode && e.id ? e.id : "l" + i}>
                     <span className="rg-lb-rank mono">{i + 1}</span>
-                    <span className="rg-lb-name">{e.name}</span>
+                    <span className="rg-lb-name"><span className="rg-lb-who">{e.name}</span>{e.caliber ? <span className="rg-lb-rig">{e.caliber}</span> : null}</span>
                     <span className="rg-lb-hits mono">{e.hits}/{course.length}</span>
                     <span className="rg-lb-score mono">{e.score}</span>
                     <span className="rg-lb-bar" style={{ width: (leader ? Math.max(6, e.score / leader * 100) : 0) + "%" }}></span>
@@ -638,7 +663,7 @@
                 ))}
                 <div className="rg-lb-row you">
                   <span className="rg-lb-rank mono">{proj}</span>
-                  <span className="rg-lb-name">{liveName}<span className="rg-lb-livetag"><i className="rg-lb-pulse"></i>LIVE RUN</span></span>
+                  <span className="rg-lb-name"><span className="rg-lb-who">{liveName}<span className="rg-lb-livetag"><i className="rg-lb-pulse"></i>LIVE RUN</span></span><span className="rg-lb-rig">{gcal.name} · {gload.grains}gr {gload.line}</span></span>
                   <span className="rg-lb-hits mono">{hits}/{course.length}</span>
                   <span className="rg-lb-score mono">{finalScore}</span>
                   <span className="rg-lb-bar live" style={{ width: (leader ? Math.min(100, Math.max(6, finalScore / leader * 100)) : 100) + "%" }}></span>
@@ -715,12 +740,12 @@
                       {rows.length === 0 && <div className="rg-empty">No scores logged yet this month{globalMode ? " — be the first" : ""}.</div>}
                       {rows.map((e, i) => (
                         <div className={"rg-board-row" + (mine(e) ? " me" : "")} key={globalMode ? e.id : i}>
-                          <span className="rb-rank mono">{i + 1}</span><span className="rb-name">{e.name}</span><span className="rb-hits mono">{e.hits}/{course.length}</span><span className="rb-score mono">{e.score}</span>
+                          <span className="rb-rank mono">{i + 1}</span><span className="rb-name">{e.name}{e.caliber ? <em className="rb-rig">{e.caliber}</em> : null}</span><span className="rb-hits mono">{e.hits}/{course.length}</span><span className="rb-score mono">{e.score}</span>
                         </div>
                       ))}
                       {globalMode && submitted && gRank > 10 && (
                         <div className="rg-board-row me">
-                          <span className="rb-rank mono">{gRank}</span><span className="rb-name">{submitted.name}</span><span className="rb-hits mono">{submitted.hits}/{course.length}</span><span className="rb-score mono">{submitted.score}</span>
+                          <span className="rb-rank mono">{gRank}</span><span className="rb-name">{submitted.name}{submitted.caliber ? <em className="rb-rig">{submitted.caliber}</em> : null}</span><span className="rb-hits mono">{submitted.hits}/{course.length}</span><span className="rb-score mono">{submitted.score}</span>
                         </div>
                       )}
                       {lbErr && <div className="rg-empty">Global board unreachable — score saved on this device.</div>}
@@ -737,6 +762,11 @@
               <button className="rg-replay" onClick={() => restart()}><window.UI.Icon name="crosshair" size={15} /> PLAY AGAIN · NEW WIND</button>
               <button className="rg-replay alt" onClick={() => setPhase("intro")}>RULES &amp; PRIZE</button>
             </div>
+            <a className="rg-ad" href="https://grabagun.com/ammo-subscription" target="_blank" rel="noopener noreferrer">
+              <img src="assets/ammo-subscription.png" alt="GrabAGun Ammo Subscription — never run dry" />
+              <span className="rg-ad-tag">Ad</span>
+              <span className="rg-ad-cta">Never run dry — subscribe &amp; save <span className="rg-ad-arrow">→</span></span>
+            </a>
           </div>
         </div>
       )}
