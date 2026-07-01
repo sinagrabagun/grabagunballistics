@@ -215,12 +215,18 @@
             <Slider value={state.shootingAngle} onChange={(v) => set({ shootingAngle: v })} min={-60} max={60} step={1}
               fmt={(v) => (v > 0 ? "+" : "") + v + "°"} />
           </Field>
-          <Field label="Barrel twist" hint="1 turn in N inches">
-            <NumberInput value={state.twist} onChange={(v) => set({ twist: v })} step={0.5} min={3} max={40} />
-          </Field>
+          <div className="two-col">
+            <Field label="Barrel twist" hint="1 turn in N inches">
+              <NumberInput value={state.twist} onChange={(v) => set({ twist: v })} step={0.5} min={3} max={40} />
+            </Field>
+            <Field label="Twist direction" hint="rifling hand">
+              <Segmented value={state.twistDir || "R"} onChange={(v) => set({ twistDir: v })}
+                options={[{ v: "R", l: "Right" }, { v: "L", l: "Left" }]} />
+            </Field>
+          </div>
           <div className="vel-note">
             {stab
-              ? "1:" + (Math.round(state.twist * 10) / 10) + '" · stability SG ' + stab.sg.toFixed(2) + " · " + (stab.sg >= 1.5 ? "well stabilized" : stab.sg >= 1.0 ? "marginal" : "under-stabilized") + " · est. length " + stab.lengthIn.toFixed(2) + '"'
+              ? "1:" + (Math.round(state.twist * 10) / 10) + '" · SG ' + stab.sg.toFixed(2) + " · " + (stab.sg >= 1.5 ? "well stabilized" : stab.sg >= 1.0 ? "marginal" : "under-stabilized") + " · " + ((state.twistDir || "R") === "L" ? "LH twist \u2192 drifts left" : "RH twist \u2192 drifts right")
               : "Enter barrel twist for a stability estimate."}
           </div>
         </section>

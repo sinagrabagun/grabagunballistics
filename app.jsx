@@ -12,7 +12,7 @@
     caliberId: "65creedmoor",
     mfr: "Hornady", line: "ELD Match", loadIdx: 0,
     barrelLength: 24, mvOverride: null, bcOverride: null,
-    twist: 8, showSpinDrift: true,
+    twist: 8, twistDir: "R", showSpinDrift: true,
     zeroRange: 100, sightHeight: 1.5, shootingAngle: 0,
     windSpeed: 10, windDir: 3,
     tempF: 59, altitudeFt: 0,
@@ -223,12 +223,12 @@
         shootingAngle: state.shootingAngle,
         windSpeed: state.showWind ? state.windSpeed : 0, windDir: state.windDir,
         tempF: state.tempF, altitudeFt: state.altitudeFt,
-        twist: state.twist, diameter: cal.diameter, spinDrift: state.showSpinDrift,
+        twist: state.twist, leftTwist: state.twistDir === "L", diameter: cal.diameter, spinDrift: state.showSpinDrift,
         maxRange: state.maxRange, increment: state.increment
       });
     }, [load, dragModel, effBcG1, effBcG7, activeMV, state.sightHeight, state.zeroRange, state.shootingAngle,
         state.showWind, state.windSpeed, state.windDir, state.tempF, state.altitudeFt,
-        cal.diameter, state.twist, state.showSpinDrift,
+        cal.diameter, state.twist, state.twistDir, state.showSpinDrift,
         state.maxRange, state.increment]);
 
     // summary values

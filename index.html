@@ -63,7 +63,7 @@
      dead space, and nested/double scrollbars. */
   html[data-embedded], html[data-embedded] body { overflow: visible; height: auto; }
   html[data-embedded] .rail { height: auto; max-height: none; overflow: visible; position: static; }
-  html[data-embedded] .topbar { position: static; }
+  html[data-embedded] .topbar { position: relative; }  /* relative (not static) so the ::after accent line stays anchored to the bar instead of dropping mid-page */
   /* intro / results / admin overlays: flow in-document instead of fixed-to-viewport */
   html[data-embedded] .rg-modal-overlay,
   html[data-embedded] .admin-overlay {
